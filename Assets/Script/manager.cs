@@ -80,7 +80,7 @@ public class manager : MonoBehaviour {
 				waitingSpawn = true;
 				waitingInput = false;
 			}
-			UpdateTilesGradeOnBoard();
+			
 		}			
 	}
 
@@ -94,6 +94,100 @@ public class manager : MonoBehaviour {
 		Spawn();
 		//
 	}
+	void UpdateTilesMoveDirByPosition(int x, int y){
+		// 생성된 타일의 4방향 값을 셋팅한다.
+		// 4 방향으로 move[dir] 값을 셋팅한다.
+		tile nowTile= null;
+		
+		nowTile = GetTileInfoOnBoard(x,y);
+		//
+		for (int dir = 0; dir < 4; ++dir){
+			bool tmpWall = true;
+			tile compareTile = null;
+			switch (dir){
+				case 0://위
+					if (y >= 1) {
+						compareTile  = GetTileInfoOnBoard(x,y-1);
+						tmpWall = false;
+					}
+					break;
+				case 1://오른쪽
+					if (x <= 2){
+						compareTile  = GetTileInfoOnBoard(x+1,y);			
+						tmpWall = false;
+					} 
+					break;
+				case 2://아래
+					if (y <= 2){
+						compareTile  = GetTileInfoOnBoard(x,y+1);
+						tmpWall = false;		
+					} 	
+					break;
+				case 3://왼쪽
+					if (x >= 1){
+						compareTile  = GetTileInfoOnBoard(x-1,y);			
+						tmpWall = false;
+					} 
+					break;
+			}
+			if(compareTile == null){
+				if(!tmpWall){
+					nowTile.move[dir] = true;
+				}	
+			}
+			else{
+				Debug.Log("dir(" + dir + ")(" + x +"," + y + ")" + nowTile.move[dir] + "compare(" + compareTile.tilePos.x + "," + compareTile.tilePos.y + ")" + compareTile.move[dir] );
+				if(compareTile.move[dir]== false && nowTile.grade == compareTile.grade){
+					nowTile.combine[dir] = true;
+					nowTile.move[dir] = true;
+				}
+			}
+		}
+	}
+
+	void UpdateTilesMoveDir(){
+		GameObject[] weapons;
+		GameObject background = GameObject.FindWithTag("Background");
+		board CBoard;
+		tile CTile;
+
+		weapons = GameObject.FindGameObjectsWithTag("WeaponTile");
+		CBoard = background.GetComponent<board>();
+		foreach (GameObject weapon in weapons) {
+			CTile = weapon.GetComponent<tile>();
+			UpdateTilesMoveDirByPosition((int)CTile.tilePos.x , (int)CTile.tilePos.y);
+		}
+		
+	}
+	void UpdateTilesGradeOnBoard(){
+		GameObject[] weapons;
+		GameObject background = GameObject.FindWithTag("Background");
+		tile CTile;
+		board CBoard;
+
+		weapons = GameObject.FindGameObjectsWithTag("WeaponTile");
+		CBoard = background.GetComponent<board>();
+		// for 너무 많이 돌지 말자. 있는거 셋팅 10이상으로  자리하고 빼자.
+		foreach (GameObject weapon in weapons) {
+			int tmpGrade = 10;
+			CTile = weapon.GetComponent<tile>();
+			tmpGrade =  CTile.grade + tmpGrade;
+			CBoard.boardValue[ (int)CTile.tilePos.x, (int)CTile.tilePos.y] = tmpGrade;
+			CBoard.tileOnBoard[(int)CTile.tilePos.x, (int)CTile.tilePos.y] = CTile;
+		}
+		for (int i = 0; i < row; ++i){
+			for (int j = 0; j < col; ++j){			
+				if(CBoard.boardValue[i,j] <= 10){
+					CBoard.boardValue[i,j] = 0;
+					CBoard.tileOnBoard[i,j] = null;
+				}
+				else{
+					CBoard.boardValue[i,j] = CBoard.boardValue[i,j] - 10;
+				}
+			}
+		}
+	}
+	
 	// 타일 움직이기
 	bool IsMove(GameObject weponTile, int dir){
 		switch(dir) {
@@ -122,7 +216,9 @@ public class manager : MonoBehaviour {
 
 		foreach (GameObject weapon in weapons) {
 			Vector2 Vtor = Vector2.zero;
-			if (IsMove(weapon, dir)){
+			tile CTile = weapon.GetComponent<tile>();
+
+			if (CTile.move[dir]){
 				switch(dir) {
 					case 0: 
 						//weapon 의 local pos를 움직이고 weapon의 Tile 타일의 속성을 바꿔준다.
@@ -137,95 +233,32 @@ public class manager : MonoBehaviour {
 					case 3:
 						Vtor = -Vector2.right;
 						break;	
-				}	
-			}
-			//이거 tween으로 손가락이 간 만큼만 움직여야 해.threes한번 봐봐.
-			//foreach로 한꺼번에 같이 움직이는게 될까?
-			weapon.GetComponent<tile>().tilePos = weapon.GetComponent<tile>().tilePos + Vtor;
-			weapon.transform.localPosition = GridToWorld((int)weapon.GetComponent<tile>().tilePos.x , (int)weapon.GetComponent<tile>().tilePos.y);	
+				}
+				CTile.tilePos = CTile.tilePos + Vtor;
+				weapon.transform.localPosition = GridToWorld((int)CTile.tilePos.x , (int)CTile.tilePos.y);
+				//UpdateTilesMoveDir((int)CTile.tilePos.x, (int)CTile.tilePos.y );
+			}		
 		}
 	}
-	bool CheckMoveAble(){
-		/*
-		GameObject[] weapons;
-		GameObject background = GameObject.FindWithTag("Background");
-		Vector2 tilePos;
-		weapons = GameObject.FindGameObjectsWithTag("WeaponTile");
-		foreach (GameObject weapon in weapons) {
-			int getGrade;
-			tilePos =  weapon.GetComponent<tile>().tilePos;
-			// dir =1 오른쪽
-			if (tilePos.x < 3){
-				getGrade = background.GetComponent<board>().boardValue[(int)tilePos.x +1, (int)tilePos.y];
-				if(getGrade == 0){
-					weapon.GetComponent<tile>().move[1] = true;
-				}
-				else if(weapon.GetComponent<tile>().grade == getGrade){
-					weapon.GetComponent<tile>().move[1] = true;
-					weapon.GetComponent<tile>().combine[1] = true;
 
-					//합쳐지면 이하 타일이 모두 움직일 수 있다.
-					
-
-				}
-			}
-		}
-		*/
-
-		// 좌우 위아래를 체크해서 움직일 수 있는지 확인한다.
-		// 최종 움직임과 상관없다. 위에 타일이 움직일 수 있으면 움직임이 가능함으로 바꿔줘야한다.
-		return true;
-	}
-	void UpdateTilesGradeOnBoard(){
-		GameObject[] weapons;
-		GameObject background = GameObject.FindWithTag("Background");
-		Vector2 tilePos;
-
-		weapons = GameObject.FindGameObjectsWithTag("WeaponTile");
-		
-		// for 너무 많이 돌지 말자. 셋팅 10의 자리하고 빼자.
-		foreach (GameObject weapon in weapons) {
-			int tmpGrade = 10;
-			tmpGrade = tmpGrade + weapon.GetComponent<tile>().grade;
-			tilePos =  weapon.GetComponent<tile>().tilePos;
-			background.GetComponent<board>().boardValue[ (int)tilePos.x, (int)tilePos.y] = tmpGrade;
-		}
-		for (int i = 0; i < row; ++i){
-			for (int j = 0; j < col; ++j){		
-				if(background.GetComponent<board>().boardValue[i,j] <= 10){
-					background.GetComponent<board>().boardValue[i,j] = 0;
-				}
-				else{
-					background.GetComponent<board>().boardValue[i,j] = background.GetComponent<board>().boardValue[i,j] - 10;
-				}
-				//Debug.Log("보드 업데이트 = [" + i + ","+ j +"]" + background.GetComponent<board>().boardValue[i,j]) ;
-			}
-		}
-        
-	}
-	void SetTileInfoToBoard(int x, int y, int grade){
+	void SetTileInfoToBoard(int x, int y, tile ctile){
 		//특수 몬스터, 스킬에 사용하자.
 		GameObject background = GameObject.FindWithTag("Background");
-		background.GetComponent<board>().boardValue[x,y] = grade;
+		background.GetComponent<board>().tileOnBoard[x,y] = ctile;
 	}
-	int GetTileInfoOnBoard(int x, int y){
-		int grade;
+	tile GetTileInfoOnBoard(int x, int y){
+		tile weaponTile;
 		GameObject background = GameObject.FindWithTag("Background");
-		grade = background.GetComponent<board>().boardValue[x,y];
-		return grade;
+		weaponTile = background.GetComponent<board>().tileOnBoard[x,y];
+		return weaponTile;
 	}
 	bool CanSpawn(int x , int y){
 		// 위치에 있는지 확인
-		GameObject[] weapons;
-		int grade;
-		
-        weapons = GameObject.FindGameObjectsWithTag("WeaponTile");
-		if(weapons.Length ==0){
-			return true;
-		}
-
-		grade = GetTileInfoOnBoard(x,y);
-		if(grade == 0){
+		tile weaponTile;
+		UpdateTilesGradeOnBoard();
+		UpdateTilesMoveDir();
+		weaponTile = GetTileInfoOnBoard(x,y);
+		if(weaponTile == null){
 			return true;
 		}
 		return false;
@@ -254,12 +287,13 @@ public class manager : MonoBehaviour {
 			//혹시 새로운게 두 개 이상일 경우도 있으니. 테스트도 포함해서.
 			newTileCount++;
 			if(newTileMaxCount <= newTileCount){
-				// 생성이 종료 되었음
-				
+				// 생성이 종료 되었음	
 				newTileCount = 0;
 				waitingSpawn = false;
 				waitingInput = true;
+				//UpdateTilesGradeOnBoard();
 				UpdateTilesGradeOnBoard();
+				UpdateTilesMoveDir();
 			}
 		}
 	}
