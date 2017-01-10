@@ -94,72 +94,157 @@ public class manager : MonoBehaviour {
 		Spawn();
 		//
 	}
-	void UpdateTilesMoveDirByPosition(int x, int y){
-		// 생성된 타일의 4방향 값을 셋팅한다.
-		// 4 방향으로 move[dir] 값을 셋팅한다.
-		tile nowTile= null;
+	
+	void UpdateTilesMoveDir(){
+
+		GameObject background = GameObject.FindWithTag("Background");
+		board CBoard;
+
+		CBoard = background.GetComponent<board>();
+
 		
-		nowTile = GetTileInfoOnBoard(x,y);
-		//
-		for (int dir = 0; dir < 4; ++dir){
-			bool tmpWall = true;
-			tile compareTile = null;
-			switch (dir){
-				case 0://위
-					if (y >= 1) {
-						compareTile  = GetTileInfoOnBoard(x,y-1);
-						tmpWall = false;
+		for (int i = 0; i < col; ++i){
+			for (int j = 0; j < row; ++j){
+				// dir - 0
+				if(CBoard.tileOnBoard[i,0] == null){
+					if(!CBoard.tileOnBoard[i,j] && j >=1 ) CBoard.tileOnBoard[i,j].move[0] = true;
+				}
+				else{
+					if(CBoard.tileOnBoard[i,1] == null){
+						if(!CBoard.tileOnBoard[i,j] && j >= 2) CBoard.tileOnBoard[j,j].move[0] = true;
 					}
-					break;
-				case 1://오른쪽
-					if (x <= 2){
-						compareTile  = GetTileInfoOnBoard(x+1,y);			
-						tmpWall = false;
-					} 
-					break;
-				case 2://아래
-					if (y <= 2){
-						compareTile  = GetTileInfoOnBoard(x,y+1);
-						tmpWall = false;		
-					} 	
-					break;
-				case 3://왼쪽
-					if (x >= 1){
-						compareTile  = GetTileInfoOnBoard(x-1,y);			
-						tmpWall = false;
-					} 
-					break;
-			}
-			if(compareTile == null){
-				if(!tmpWall){
-					nowTile.move[dir] = true;
-				}	
-			}
-			else{
-				Debug.Log("dir(" + dir + ")(" + x +"," + y + ")" + nowTile.move[dir] + "compare(" + compareTile.tilePos.x + "," + compareTile.tilePos.y + ")" + compareTile.move[dir] );
-				if(compareTile.move[dir]== false && nowTile.grade == compareTile.grade){
-					nowTile.combine[dir] = true;
-					nowTile.move[dir] = true;
+					else if( CBoard.tileOnBoard[i,0].grade == CBoard.tileOnBoard[i,1].grade ){
+						if(!CBoard.tileOnBoard[i,j] && j >=1) {
+							CBoard.tileOnBoard[i,j].move[0] = true;
+							CBoard.tileOnBoard[i,j].combine[0] = true;
+						}
+					}
+					else{
+						if(CBoard.tileOnBoard[i,2] == null){
+							if(!CBoard.tileOnBoard[i,j] && j >=3) CBoard.tileOnBoard[i,j].move[0] = true;
+						}
+						else if(CBoard.tileOnBoard[j,1].grade == CBoard.tileOnBoard[j,2].grade ){
+							if(!CBoard.tileOnBoard[i,j] && j >= 2){
+								CBoard.tileOnBoard[j,j].move[0] = true;
+								CBoard.tileOnBoard[j,j].combine[0] = true;
+							} 
+						}
+						else{
+							if(!CBoard.tileOnBoard[i,3]){
+								if(CBoard.tileOnBoard[j,3].grade == CBoard.tileOnBoard[j,2].grade){
+									if(!CBoard.tileOnBoard[i,j] && j >=3){
+										CBoard.tileOnBoard[i,j].move[0] = true;
+										CBoard.tileOnBoard[i,j].combine[0] = true;
+									} 
+								}
+							}
+						}
+					}
+				}
+				// dir - 1
+				if(CBoard.tileOnBoard[3,i] == null){
+					if(!CBoard.tileOnBoard[3-j,i] && j >=1 ) CBoard.tileOnBoard[3-j,j].move[1] = true;
+				}
+				else{
+					if(CBoard.tileOnBoard[2,i] == null){
+						if(!CBoard.tileOnBoard[3-j,i] && j >= 2) CBoard.tileOnBoard[3-j,j].move[1] = true;
+					}
+					else if( CBoard.tileOnBoard[3,i].grade == CBoard.tileOnBoard[2,i].grade ){
+						if(!CBoard.tileOnBoard[3-j,i] && j >=1) {
+							CBoard.tileOnBoard[3-j,j].move[1] = true;
+							CBoard.tileOnBoard[3-j,j].combine[1] = true;
+						}
+					}
+					else{
+						if(CBoard.tileOnBoard[1,i] == null){
+							if(!CBoard.tileOnBoard[3-j,i] && j >=3) CBoard.tileOnBoard[3-j,j].move[1] = true;
+						}
+						else if(CBoard.tileOnBoard[1,i].grade == CBoard.tileOnBoard[j,2].grade ){
+							if(!CBoard.tileOnBoard[3-j,i] && j >= 2){
+								CBoard.tileOnBoard[3-j,j].move[1] = true;
+								CBoard.tileOnBoard[3-j,j].combine[1] = true;
+							} 
+						}
+						else{
+							if(!CBoard.tileOnBoard[i,3]){
+								if(CBoard.tileOnBoard[i,3].grade == CBoard.tileOnBoard[i,2].grade){
+									if(!CBoard.tileOnBoard[3-j,i] && j >=3){
+										CBoard.tileOnBoard[3-j,j].move[1] = true;
+										CBoard.tileOnBoard[3-j,j].combine[1] = true;		
+									} 
+								}
+							}
+						}
+					}
+				}
+				// dir - 2
+				if(CBoard.tileOnBoard[i,3] == null){
+					if(!CBoard.tileOnBoard[i,3-j] && j >=1 ) CBoard.tileOnBoard[i,3-j].move[2] = true;
+				}
+				else{
+					if(CBoard.tileOnBoard[i,2] == null){
+						if(!CBoard.tileOnBoard[i,3-j] && j >= 2) CBoard.tileOnBoard[i,3-j].move[2] = true;
+					}
+					else if( CBoard.tileOnBoard[i,3].grade == CBoard.tileOnBoard[i,2].grade ){
+						if(!CBoard.tileOnBoard[i,3-j] && j >=1){
+							CBoard.tileOnBoard[i,3-j].move[2] = true;
+							CBoard.tileOnBoard[i,3-j].combine[2] = true;
+						} 
+					}
+					else{
+						if(CBoard.tileOnBoard[i,1] == null){
+							if(!CBoard.tileOnBoard[i,3-j] && j >=3) CBoard.tileOnBoard[i,3-j].move[2] = true;
+						}
+						else if(CBoard.tileOnBoard[i,2].grade == CBoard.tileOnBoard[i,1].grade ){
+							if(!CBoard.tileOnBoard[i,3-j] && j >= 2) {
+								CBoard.tileOnBoard[i,3-j].move[2] = true;
+								CBoard.tileOnBoard[i,3-j].combine[2] = true;
+							}
+						}
+						else{
+							if(!CBoard.tileOnBoard[i,0]){
+								if(CBoard.tileOnBoard[i,1].grade == CBoard.tileOnBoard[i,0].grade){
+									if(!CBoard.tileOnBoard[i,3-j] && j >=3){
+										CBoard.tileOnBoard[i,3-j].move[2] = true;
+										CBoard.tileOnBoard[i,3-j].combine[2] = true;
+									} 
+								}
+							}
+						}
+					}
+				}
+				// dir - 3
+				if(CBoard.tileOnBoard[0,i] == null){
+					if(!CBoard.tileOnBoard[j,i] && j >=1 ) CBoard.tileOnBoard[j,i].move[3] = true;
+				}
+				else{
+					if(CBoard.tileOnBoard[1,i] == null){
+						if(!CBoard.tileOnBoard[j,i] && j >= 2) CBoard.tileOnBoard[j,i].move[3] = true;
+					}
+					else if( CBoard.tileOnBoard[0,i].grade == CBoard.tileOnBoard[1,i].grade ){
+						if(!CBoard.tileOnBoard[j,i] && j >=1) CBoard.tileOnBoard[j,i].move[3] = true;
+					}
+					else{
+						if(CBoard.tileOnBoard[2,i] == null){
+							if(!CBoard.tileOnBoard[j,i] && j >=3) CBoard.tileOnBoard[j,i].move[3] = true;
+						}
+						else if(CBoard.tileOnBoard[j,1].grade == CBoard.tileOnBoard[j,2].grade ){
+							if(!CBoard.tileOnBoard[j,i] && j >= 2) CBoard.tileOnBoard[j,i].move[3] = true;
+						}
+						else{
+							if(!CBoard.tileOnBoard[3,i]){
+								if(CBoard.tileOnBoard[j,3].grade == CBoard.tileOnBoard[j,2].grade){
+									if(!CBoard.tileOnBoard[j,i] && j >=3) CBoard.tileOnBoard[j,i].move[3] = true;
+								}
+							}
+						}
+					}
 				}
 			}
 		}
-	}
-
-	void UpdateTilesMoveDir(){
-		GameObject[] weapons;
-		GameObject background = GameObject.FindWithTag("Background");
-		board CBoard;
-		tile CTile;
-
-		weapons = GameObject.FindGameObjectsWithTag("WeaponTile");
-		CBoard = background.GetComponent<board>();
-		foreach (GameObject weapon in weapons) {
-			CTile = weapon.GetComponent<tile>();
-			UpdateTilesMoveDirByPosition((int)CTile.tilePos.x , (int)CTile.tilePos.y);
-		}
 		
 	}
-	void UpdateTilesGradeOnBoard(){
+	void UpdateTilesOnBoard(){
 		GameObject[] weapons;
 		GameObject background = GameObject.FindWithTag("Background");
 		tile CTile;
@@ -236,7 +321,6 @@ public class manager : MonoBehaviour {
 				}
 				CTile.tilePos = CTile.tilePos + Vtor;
 				weapon.transform.localPosition = GridToWorld((int)CTile.tilePos.x , (int)CTile.tilePos.y);
-				//UpdateTilesMoveDir((int)CTile.tilePos.x, (int)CTile.tilePos.y );
 			}		
 		}
 	}
@@ -255,7 +339,7 @@ public class manager : MonoBehaviour {
 	bool CanSpawn(int x , int y){
 		// 위치에 있는지 확인
 		tile weaponTile;
-		UpdateTilesGradeOnBoard();
+		UpdateTilesOnBoard();
 		UpdateTilesMoveDir();
 		weaponTile = GetTileInfoOnBoard(x,y);
 		if(weaponTile == null){
@@ -292,7 +376,7 @@ public class manager : MonoBehaviour {
 				waitingSpawn = false;
 				waitingInput = true;
 				//UpdateTilesGradeOnBoard();
-				UpdateTilesGradeOnBoard();
+				UpdateTilesOnBoard();
 				UpdateTilesMoveDir();
 			}
 		}
