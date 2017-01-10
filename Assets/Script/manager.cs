@@ -135,7 +135,7 @@ public class manager : MonoBehaviour {
 						if(CBoard.tileOnBoard[i,2] == null){
 							if(CBoard.tileOnBoard[i,j] != null  && j >=3) CBoard.tileOnBoard[i,j].move[0] = true;
 						}
-						else if(CBoard.tileOnBoard[j,1].grade == CBoard.tileOnBoard[j,2].grade ){
+						else if(CBoard.tileOnBoard[i,1].grade == CBoard.tileOnBoard[i,2].grade ){
 							if(CBoard.tileOnBoard[i,j] != null  && j >= 2){
 								CBoard.tileOnBoard[i,j].move[0] = true;
 								CBoard.tileOnBoard[i,2].combine[0] = true;
@@ -143,7 +143,7 @@ public class manager : MonoBehaviour {
 						}
 						else{
 							if(CBoard.tileOnBoard[i,3]!= null){
-								if(CBoard.tileOnBoard[j,2].grade == CBoard.tileOnBoard[j,3].grade){
+								if(CBoard.tileOnBoard[i,2].grade == CBoard.tileOnBoard[i,3].grade){
 									if(CBoard.tileOnBoard[i,j]  != null && j >=3){
 										CBoard.tileOnBoard[i,j].move[0] = true;
 										CBoard.tileOnBoard[i,3].combine[0] = true;
@@ -179,7 +179,7 @@ public class manager : MonoBehaviour {
 						}
 						else{
 							if(CBoard.tileOnBoard[0,i]!= null){
-								if(CBoard.tileOnBoard[0,i].grade == CBoard.tileOnBoard[0,i].grade){
+								if(CBoard.tileOnBoard[0,i].grade == CBoard.tileOnBoard[1,i].grade){
 									if(CBoard.tileOnBoard[3-j,i]!= null && j >=3){
 										CBoard.tileOnBoard[3-j,i].move[1] = true;
 										CBoard.tileOnBoard[0,i].combine[1] = true;		
@@ -251,7 +251,7 @@ public class manager : MonoBehaviour {
 						}
 						else{
 							if(CBoard.tileOnBoard[3,i]!= null){
-								if(CBoard.tileOnBoard[2,i].grade == CBoard.tileOnBoard[3,i].grade){
+								if(CBoard.tileOnBoard[3,i].grade == CBoard.tileOnBoard[2,i].grade){
 									if(CBoard.tileOnBoard[j,i] != null && j >=3){
 										CBoard.tileOnBoard[j,i].move[3] = true;
 										CBoard.tileOnBoard[3,i].combine[3] = true;
@@ -265,12 +265,11 @@ public class manager : MonoBehaviour {
 		}
 		
 	}
-	void UpdateTilesOnBoard(){
+	void UpdateTilesOnBoard(int state){
 		GameObject[] weapons;
 		GameObject background = GameObject.FindWithTag("Background");
 		tile CTile;
 		board CBoard;
-		Debug.Log("UpdateTilesOnBoard");
 		weapons = GameObject.FindGameObjectsWithTag("WeaponTile");
 		CBoard = background.GetComponent<board>();
 		// for 너무 많이 돌지 말자. 있는거 셋팅 10이상으로  자리하고 빼자.
@@ -278,9 +277,8 @@ public class manager : MonoBehaviour {
 			int tmpGrade = 10;
 			CTile = weapon.GetComponent<tile>();
 			tmpGrade =  CTile.grade + tmpGrade;
-
 			if(CTile.combined){
-				Debug.Log("부숴버려");
+				CBoard.upgrade[(int)CTile.tilePos.x, (int)CTile.tilePos.y] = true;
 				Destroy(weapon);
 			}
 			else{
@@ -295,9 +293,31 @@ public class manager : MonoBehaviour {
 				if(CBoard.boardValue[i,j] <= 10){
 					CBoard.boardValue[i,j] = 0;
 					CBoard.tileOnBoard[i,j] = null;
+					CBoard.upgrade[i,j] = false;
 				}
 				else{
 					CBoard.boardValue[i,j] = CBoard.boardValue[i,j] - 10;
+					if(CBoard.upgrade[i,j] && state == 1){// 업그레이드
+						if (CBoard.boardValue[i,j] > 2) Debug.Log("업그레이드1 base = " + CBoard.boardValue[i,j] );
+						CBoard.boardValue[i,j] = CBoard.boardValue[i,j] + 1;
+						if (CBoard.boardValue[i,j] > 2) Debug.Log("업그레이드2 +1 = " + CBoard.upgrade[i,j]);
+						Destroy(CBoard.tileOnBoard[i,j].gameObject);
+						
+						int gradetmp = CBoard.boardValue[i,j]-1;
+						if (CBoard.boardValue[i,j] > 2) Debug.Log("업그레이드3 gradetmp = " + gradetmp);
+						GameObject summonTile = weaponTile[gradetmp];	
+						Transform backboard = GameObject.FindWithTag("Background").transform;
+						GameObject instance = Instantiate (summonTile, new Vector3 (0f,0f,0f), Quaternion.identity) as GameObject;
+						instance.transform.SetParent (backboard);
+						instance.transform.localPosition = GridToWorld(i,j);
+						instance.GetComponent<tile>().tilePos.x = (float) i;
+						instance.GetComponent<tile>().tilePos.y = (float) j;
+						instance.GetComponent<tile>().grade = CBoard.boardValue[i,j];
+						CBoard.tileOnBoard[i, j] = instance.GetComponent<tile>();
+
+						CBoard.upgrade[i,j] = false;
+						if (CBoard.boardValue[i,j] > 2) Debug.Log("업그레이드4");
+					}
 				}
 			}
 		}
@@ -385,7 +405,7 @@ public class manager : MonoBehaviour {
 	bool CanSpawn(int x , int y){
 		// 위치에 있는지 확인
 		tile weaponTile;
-		UpdateTilesOnBoard();
+		UpdateTilesOnBoard(0);
 		UpdateTilesMoveDir();
 		weaponTile = GetTileInfoOnBoard(x,y);
 		if(weaponTile == null){
@@ -422,7 +442,7 @@ public class manager : MonoBehaviour {
 				waitingSpawn = false;
 				waitingInput = true;
 				//UpdateTilesGradeOnBoard();
-				UpdateTilesOnBoard();
+				UpdateTilesOnBoard(1);
 				UpdateTilesMoveDir();
 			}
 		}
