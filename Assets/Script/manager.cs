@@ -12,6 +12,7 @@ public class manager : MonoBehaviour {
 	private int newTileCount = 0;
 	// 한번에 많이 생성할 경우.
 	public int newTileMaxCount = 1;
+	private bool[] canMove = new bool[4];
 	
 
 	// gameState
@@ -45,11 +46,13 @@ public class manager : MonoBehaviour {
 		// background 로딩
 		boardHolder = new GameObject("baseObject").transform;
 		boardHolder.position = new Vector3 (-2.82f,-4.34f,0f);
-
 		GameObject instance = Instantiate (board, new Vector3 (0f,0f,0f), Quaternion.identity) as GameObject;
         instance.transform.SetParent (boardHolder);
 		instance.transform.position = new Vector3 (-2.82f,-4.34f,0f);
-		
+		canMove[0] = false;
+		canMove[1] = false;
+		canMove[2] = false;
+		canMove[3] = false;
 		// 게임 시작
 		GameStart();
 	}
@@ -61,24 +64,37 @@ public class manager : MonoBehaviour {
 		}
 		if(waitingInput){
 			if(Input.GetKeyUp(KeyCode.UpArrow)){
-				Move(0);
-				waitingSpawn = true;
-				waitingInput = false;
+				if(canMove[0]){
+					Move(0);
+					waitingSpawn = true;
+					waitingInput = false;
+				}
+				else Debug.Log("못움직여");
+				
 			}    	
 			if(Input.GetKeyUp(KeyCode.RightArrow)){
-				Move(1);
-				waitingSpawn = true;
-				waitingInput = false;
+				if(canMove[1]){
+					Move(1);
+					waitingSpawn = true;
+					waitingInput = false;
+				}
+				else Debug.Log("못움직여");
 			}	
 			if(Input.GetKeyUp(KeyCode.DownArrow)){
-				Move(2);
-				waitingSpawn = true;
-				waitingInput = false;
+				if(canMove[2]){
+					Move(2);
+					waitingSpawn = true;
+					waitingInput = false;
+				}
+				else Debug.Log("못움직여");
 			}
 			if(Input.GetKeyUp(KeyCode.LeftArrow)){
-				Move(3);
-				waitingSpawn = true;
-				waitingInput = false;
+				if(canMove[3]){
+					Move(3);
+					waitingSpawn = true;
+					waitingInput = false;
+				}
+				else Debug.Log("못움직여");
 			}
 			
 		}			
@@ -96,12 +112,16 @@ public class manager : MonoBehaviour {
 	}
 	
 	void UpdateTilesMoveDir(){
-
 		GameObject background = GameObject.FindWithTag("Background");
 		GameObject[] weapons;
 		board CBoard;
 		tile CTile;
 
+		canMove[0] = false;
+		canMove[1] = false;
+		canMove[2] = false;
+		canMove[3] = false;
+		
 		CBoard = background.GetComponent<board>();
 		
 		weapons = GameObject.FindGameObjectsWithTag("WeaponTile");
@@ -263,7 +283,24 @@ public class manager : MonoBehaviour {
 				}
 			}
 		}
-		
+		for(int k = 0; k < 4 ; ++k){
+			for(int l = 0 ; l < 4; ++l){
+				if(CBoard.tileOnBoard[k,l] != null ){
+					Debug.Log("(" + k + "," + l + ")" + canMove[0] + "| " + CBoard.tileOnBoard[k,l].move[0]);
+					Debug.Log("(" + k + "," + l + ")" + canMove[1] + "| " + CBoard.tileOnBoard[k,l].move[1]);
+					Debug.Log("(" + k + "," + l + ")" + canMove[2] + "| " + CBoard.tileOnBoard[k,l].move[2]);
+					Debug.Log("(" + k + "," + l + ")" + canMove[3] + "| " + CBoard.tileOnBoard[k,l].move[3]);
+					canMove[0] = canMove[0] || CBoard.tileOnBoard[k,l].move[0];
+					canMove[1] = canMove[1] || CBoard.tileOnBoard[k,l].move[1];
+					canMove[2] = canMove[2] || CBoard.tileOnBoard[k,l].move[2];
+					canMove[3] = canMove[3] || CBoard.tileOnBoard[k,l].move[3];
+					Debug.Log("(" + k + "," + l + ")" + canMove[0]);
+					Debug.Log("(" + k + "," + l + ")" + canMove[1]);
+					Debug.Log("(" + k + "," + l + ")" + canMove[2]);
+					Debug.Log("(" + k + "," + l + ")" + canMove[3]);
+				}
+			}
+		}			
 	}
 	void UpdateTilesOnBoard(int state){
 		GameObject[] weapons;
@@ -298,13 +335,10 @@ public class manager : MonoBehaviour {
 				else{
 					CBoard.boardValue[i,j] = CBoard.boardValue[i,j] - 10;
 					if(CBoard.upgrade[i,j] && state == 1){// 업그레이드
-						if (CBoard.boardValue[i,j] > 2) Debug.Log("업그레이드1 base = " + CBoard.boardValue[i,j] );
 						CBoard.boardValue[i,j] = CBoard.boardValue[i,j] + 1;
-						if (CBoard.boardValue[i,j] > 2) Debug.Log("업그레이드2 +1 = " + CBoard.upgrade[i,j]);
 						Destroy(CBoard.tileOnBoard[i,j].gameObject);
 						
 						int gradetmp = CBoard.boardValue[i,j]-1;
-						if (CBoard.boardValue[i,j] > 2) Debug.Log("업그레이드3 gradetmp = " + gradetmp);
 						GameObject summonTile = weaponTile[gradetmp];	
 						Transform backboard = GameObject.FindWithTag("Background").transform;
 						GameObject instance = Instantiate (summonTile, new Vector3 (0f,0f,0f), Quaternion.identity) as GameObject;
@@ -316,7 +350,6 @@ public class manager : MonoBehaviour {
 						CBoard.tileOnBoard[i, j] = instance.GetComponent<tile>();
 
 						CBoard.upgrade[i,j] = false;
-						if (CBoard.boardValue[i,j] > 2) Debug.Log("업그레이드4");
 					}
 				}
 			}
@@ -360,6 +393,7 @@ public class manager : MonoBehaviour {
 						if(CTile.combine[dir]){
 							CTile.combine[dir] = false;
 							CTile.combined = true;
+							
 						}
 						break;
 					case 1:
@@ -384,9 +418,9 @@ public class manager : MonoBehaviour {
 						}
 						break;	
 				}
-				CTile.tilePos = CTile.tilePos + Vtor;
-				weapon.transform.localPosition = GridToWorld((int)CTile.tilePos.x , (int)CTile.tilePos.y);
 				
+				CTile.tilePos = CTile.tilePos + Vtor;
+				weapon.transform.localPosition = GridToWorld((int)CTile.tilePos.x , (int)CTile.tilePos.y);	
 			}		
 		}
 	}
