@@ -121,7 +121,7 @@ public class manager : MonoBehaviour {
 		canMove[1] = false;
 		canMove[2] = false;
 		canMove[3] = false;
-		
+
 		CBoard = background.GetComponent<board>();
 		
 		weapons = GameObject.FindGameObjectsWithTag("WeaponTile");
@@ -286,18 +286,10 @@ public class manager : MonoBehaviour {
 		for(int k = 0; k < 4 ; ++k){
 			for(int l = 0 ; l < 4; ++l){
 				if(CBoard.tileOnBoard[k,l] != null ){
-					Debug.Log("(" + k + "," + l + ")" + canMove[0] + "| " + CBoard.tileOnBoard[k,l].move[0]);
-					Debug.Log("(" + k + "," + l + ")" + canMove[1] + "| " + CBoard.tileOnBoard[k,l].move[1]);
-					Debug.Log("(" + k + "," + l + ")" + canMove[2] + "| " + CBoard.tileOnBoard[k,l].move[2]);
-					Debug.Log("(" + k + "," + l + ")" + canMove[3] + "| " + CBoard.tileOnBoard[k,l].move[3]);
 					canMove[0] = canMove[0] || CBoard.tileOnBoard[k,l].move[0];
 					canMove[1] = canMove[1] || CBoard.tileOnBoard[k,l].move[1];
 					canMove[2] = canMove[2] || CBoard.tileOnBoard[k,l].move[2];
 					canMove[3] = canMove[3] || CBoard.tileOnBoard[k,l].move[3];
-					Debug.Log("(" + k + "," + l + ")" + canMove[0]);
-					Debug.Log("(" + k + "," + l + ")" + canMove[1]);
-					Debug.Log("(" + k + "," + l + ")" + canMove[2]);
-					Debug.Log("(" + k + "," + l + ")" + canMove[3]);
 				}
 			}
 		}			
