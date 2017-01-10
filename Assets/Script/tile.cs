@@ -7,7 +7,7 @@ public class tile : MonoBehaviour {
 	public int grade;
 
 	public bool[] combine; // [dir]
-	public bool[] combined;// [dir]
+	public bool combined;// [dir]
 	public bool[] move;  // [dir]
 	public int[] gradeAround;
 	// Use this for initialization
@@ -15,16 +15,13 @@ public class tile : MonoBehaviour {
 	
 
 	void Awake () {
-		
-		
 		combine = new bool[4];
-		combined = new bool[4];
+		combined = false;
 		move= new bool[4];
 		gradeAround = new int[4];
 		
 		for (int i = 0; i < 4; ++i){
 			combine[i] = false;
-			combined[i] = false;
 			move[i] = false;
 		}
 	}
@@ -32,6 +29,7 @@ public class tile : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+
 	
 	}
 }

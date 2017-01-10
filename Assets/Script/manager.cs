@@ -98,43 +98,55 @@ public class manager : MonoBehaviour {
 	void UpdateTilesMoveDir(){
 
 		GameObject background = GameObject.FindWithTag("Background");
+		GameObject[] weapons;
 		board CBoard;
+		tile CTile;
 
 		CBoard = background.GetComponent<board>();
-
+		
+		weapons = GameObject.FindGameObjectsWithTag("WeaponTile");
+		
+		foreach (GameObject weapon in weapons) {	
+			CTile = weapon.GetComponent<tile>();
+			for(int dir = 0; dir < 4 ; ++dir){
+				CTile.move[dir] = false;
+				CTile.combine[dir] = false;
+			}	
+		}
 		
 		for (int i = 0; i < col; ++i){
 			for (int j = 0; j < row; ++j){
 				// dir - 0
+				
 				if(CBoard.tileOnBoard[i,0] == null){
-					if(!CBoard.tileOnBoard[i,j] && j >=1 ) CBoard.tileOnBoard[i,j].move[0] = true;
+					if(CBoard.tileOnBoard[i,j] != null && j >=1 ) CBoard.tileOnBoard[i,j].move[0] = true;
 				}
 				else{
 					if(CBoard.tileOnBoard[i,1] == null){
-						if(!CBoard.tileOnBoard[i,j] && j >= 2) CBoard.tileOnBoard[j,j].move[0] = true;
+						if(CBoard.tileOnBoard[i,j] != null  && j >= 2) CBoard.tileOnBoard[i,j].move[0] = true;
 					}
 					else if( CBoard.tileOnBoard[i,0].grade == CBoard.tileOnBoard[i,1].grade ){
-						if(!CBoard.tileOnBoard[i,j] && j >=1) {
+						if(CBoard.tileOnBoard[i,j] != null  && j >=1) {
 							CBoard.tileOnBoard[i,j].move[0] = true;
-							CBoard.tileOnBoard[i,j].combine[0] = true;
+							CBoard.tileOnBoard[i,1].combine[0] = true;
 						}
 					}
 					else{
 						if(CBoard.tileOnBoard[i,2] == null){
-							if(!CBoard.tileOnBoard[i,j] && j >=3) CBoard.tileOnBoard[i,j].move[0] = true;
+							if(CBoard.tileOnBoard[i,j] != null  && j >=3) CBoard.tileOnBoard[i,j].move[0] = true;
 						}
 						else if(CBoard.tileOnBoard[j,1].grade == CBoard.tileOnBoard[j,2].grade ){
-							if(!CBoard.tileOnBoard[i,j] && j >= 2){
-								CBoard.tileOnBoard[j,j].move[0] = true;
-								CBoard.tileOnBoard[j,j].combine[0] = true;
+							if(CBoard.tileOnBoard[i,j] != null  && j >= 2){
+								CBoard.tileOnBoard[i,j].move[0] = true;
+								CBoard.tileOnBoard[i,2].combine[0] = true;
 							} 
 						}
 						else{
-							if(!CBoard.tileOnBoard[i,3]){
-								if(CBoard.tileOnBoard[j,3].grade == CBoard.tileOnBoard[j,2].grade){
-									if(!CBoard.tileOnBoard[i,j] && j >=3){
+							if(CBoard.tileOnBoard[i,3]!= null){
+								if(CBoard.tileOnBoard[j,2].grade == CBoard.tileOnBoard[j,3].grade){
+									if(CBoard.tileOnBoard[i,j]  != null && j >=3){
 										CBoard.tileOnBoard[i,j].move[0] = true;
-										CBoard.tileOnBoard[i,j].combine[0] = true;
+										CBoard.tileOnBoard[i,3].combine[0] = true;
 									} 
 								}
 							}
@@ -143,34 +155,34 @@ public class manager : MonoBehaviour {
 				}
 				// dir - 1
 				if(CBoard.tileOnBoard[3,i] == null){
-					if(!CBoard.tileOnBoard[3-j,i] && j >=1 ) CBoard.tileOnBoard[3-j,j].move[1] = true;
+					if(CBoard.tileOnBoard[3-j,i]!= null && j >=1 ) CBoard.tileOnBoard[3-j,i].move[1] = true;
 				}
 				else{
 					if(CBoard.tileOnBoard[2,i] == null){
-						if(!CBoard.tileOnBoard[3-j,i] && j >= 2) CBoard.tileOnBoard[3-j,j].move[1] = true;
+						if(CBoard.tileOnBoard[3-j,i]!= null && j >= 2) CBoard.tileOnBoard[3-j,i].move[1] = true;
 					}
 					else if( CBoard.tileOnBoard[3,i].grade == CBoard.tileOnBoard[2,i].grade ){
-						if(!CBoard.tileOnBoard[3-j,i] && j >=1) {
-							CBoard.tileOnBoard[3-j,j].move[1] = true;
-							CBoard.tileOnBoard[3-j,j].combine[1] = true;
+						if(CBoard.tileOnBoard[3-j,i]!= null && j >=1) {
+							CBoard.tileOnBoard[3-j,i].move[1] = true;
+							CBoard.tileOnBoard[2,i].combine[1] = true;
 						}
 					}
 					else{
 						if(CBoard.tileOnBoard[1,i] == null){
-							if(!CBoard.tileOnBoard[3-j,i] && j >=3) CBoard.tileOnBoard[3-j,j].move[1] = true;
+							if(CBoard.tileOnBoard[3-j,i]!= null && j >=3) CBoard.tileOnBoard[3-j,i].move[1] = true;
 						}
-						else if(CBoard.tileOnBoard[1,i].grade == CBoard.tileOnBoard[j,2].grade ){
-							if(!CBoard.tileOnBoard[3-j,i] && j >= 2){
-								CBoard.tileOnBoard[3-j,j].move[1] = true;
-								CBoard.tileOnBoard[3-j,j].combine[1] = true;
+						else if(CBoard.tileOnBoard[1,i].grade == CBoard.tileOnBoard[2,i].grade ){
+							if(CBoard.tileOnBoard[3-j,i]!= null && j >= 2){
+								CBoard.tileOnBoard[3-j,i].move[1] = true;
+								CBoard.tileOnBoard[1,i].combine[1] = true;
 							} 
 						}
 						else{
-							if(!CBoard.tileOnBoard[i,3]){
-								if(CBoard.tileOnBoard[i,3].grade == CBoard.tileOnBoard[i,2].grade){
-									if(!CBoard.tileOnBoard[3-j,i] && j >=3){
-										CBoard.tileOnBoard[3-j,j].move[1] = true;
-										CBoard.tileOnBoard[3-j,j].combine[1] = true;		
+							if(CBoard.tileOnBoard[0,i]!= null){
+								if(CBoard.tileOnBoard[0,i].grade == CBoard.tileOnBoard[0,i].grade){
+									if(CBoard.tileOnBoard[3-j,i]!= null && j >=3){
+										CBoard.tileOnBoard[3-j,i].move[1] = true;
+										CBoard.tileOnBoard[0,i].combine[1] = true;		
 									} 
 								}
 							}
@@ -179,34 +191,34 @@ public class manager : MonoBehaviour {
 				}
 				// dir - 2
 				if(CBoard.tileOnBoard[i,3] == null){
-					if(!CBoard.tileOnBoard[i,3-j] && j >=1 ) CBoard.tileOnBoard[i,3-j].move[2] = true;
+					if(CBoard.tileOnBoard[i,3-j]!= null && j >=1 ) CBoard.tileOnBoard[i,3-j].move[2] = true;
 				}
 				else{
 					if(CBoard.tileOnBoard[i,2] == null){
-						if(!CBoard.tileOnBoard[i,3-j] && j >= 2) CBoard.tileOnBoard[i,3-j].move[2] = true;
+						if(CBoard.tileOnBoard[i,3-j]!= null && j >= 2) CBoard.tileOnBoard[i,3-j].move[2] = true;
 					}
-					else if( CBoard.tileOnBoard[i,3].grade == CBoard.tileOnBoard[i,2].grade ){
-						if(!CBoard.tileOnBoard[i,3-j] && j >=1){
+					else if( CBoard.tileOnBoard[i,2].grade == CBoard.tileOnBoard[i,3].grade ){
+						if(CBoard.tileOnBoard[i,3-j]!= null && j >=1){
 							CBoard.tileOnBoard[i,3-j].move[2] = true;
-							CBoard.tileOnBoard[i,3-j].combine[2] = true;
+							CBoard.tileOnBoard[i,2].combine[2] = true;
 						} 
 					}
 					else{
 						if(CBoard.tileOnBoard[i,1] == null){
-							if(!CBoard.tileOnBoard[i,3-j] && j >=3) CBoard.tileOnBoard[i,3-j].move[2] = true;
+							if(CBoard.tileOnBoard[i,3-j]!= null && j >=3) CBoard.tileOnBoard[i,3-j].move[2] = true;
 						}
-						else if(CBoard.tileOnBoard[i,2].grade == CBoard.tileOnBoard[i,1].grade ){
-							if(!CBoard.tileOnBoard[i,3-j] && j >= 2) {
+						else if(CBoard.tileOnBoard[i,1].grade == CBoard.tileOnBoard[i,2].grade ){
+							if(CBoard.tileOnBoard[i,3-j]!= null && j >= 2) {
 								CBoard.tileOnBoard[i,3-j].move[2] = true;
-								CBoard.tileOnBoard[i,3-j].combine[2] = true;
+								CBoard.tileOnBoard[i,1].combine[2] = true;
 							}
 						}
 						else{
-							if(!CBoard.tileOnBoard[i,0]){
+							if(CBoard.tileOnBoard[i,0]!= null){
 								if(CBoard.tileOnBoard[i,1].grade == CBoard.tileOnBoard[i,0].grade){
-									if(!CBoard.tileOnBoard[i,3-j] && j >=3){
+									if(CBoard.tileOnBoard[i,3-j] != null && j >=3){
 										CBoard.tileOnBoard[i,3-j].move[2] = true;
-										CBoard.tileOnBoard[i,3-j].combine[2] = true;
+										CBoard.tileOnBoard[i,0].combine[2] = true;
 									} 
 								}
 							}
@@ -215,26 +227,35 @@ public class manager : MonoBehaviour {
 				}
 				// dir - 3
 				if(CBoard.tileOnBoard[0,i] == null){
-					if(!CBoard.tileOnBoard[j,i] && j >=1 ) CBoard.tileOnBoard[j,i].move[3] = true;
+					if(CBoard.tileOnBoard[j,i]!= null && j >=1 ) CBoard.tileOnBoard[j,i].move[3] = true;
 				}
 				else{
 					if(CBoard.tileOnBoard[1,i] == null){
-						if(!CBoard.tileOnBoard[j,i] && j >= 2) CBoard.tileOnBoard[j,i].move[3] = true;
+						if(CBoard.tileOnBoard[j,i]!= null && j >= 2) CBoard.tileOnBoard[j,i].move[3] = true;
 					}
-					else if( CBoard.tileOnBoard[0,i].grade == CBoard.tileOnBoard[1,i].grade ){
-						if(!CBoard.tileOnBoard[j,i] && j >=1) CBoard.tileOnBoard[j,i].move[3] = true;
+					else if( CBoard.tileOnBoard[1,i].grade == CBoard.tileOnBoard[0,i].grade ){
+						if(CBoard.tileOnBoard[j,i] != null&& j >=1) {
+							CBoard.tileOnBoard[j,i].move[3] = true;
+							CBoard.tileOnBoard[1,i].combine[3] = true;
+						}
 					}
 					else{
 						if(CBoard.tileOnBoard[2,i] == null){
-							if(!CBoard.tileOnBoard[j,i] && j >=3) CBoard.tileOnBoard[j,i].move[3] = true;
+							if(CBoard.tileOnBoard[j,i] != null&& j >=3) CBoard.tileOnBoard[j,i].move[3] = true;
 						}
-						else if(CBoard.tileOnBoard[j,1].grade == CBoard.tileOnBoard[j,2].grade ){
-							if(!CBoard.tileOnBoard[j,i] && j >= 2) CBoard.tileOnBoard[j,i].move[3] = true;
+						else if(CBoard.tileOnBoard[2,i].grade == CBoard.tileOnBoard[1,i].grade ){
+							if(CBoard.tileOnBoard[j,i] != null&& j >= 2){
+								CBoard.tileOnBoard[j,i].move[3] = true;
+								CBoard.tileOnBoard[2,i].combine[3] = true;
+							} 
 						}
 						else{
-							if(!CBoard.tileOnBoard[3,i]){
-								if(CBoard.tileOnBoard[j,3].grade == CBoard.tileOnBoard[j,2].grade){
-									if(!CBoard.tileOnBoard[j,i] && j >=3) CBoard.tileOnBoard[j,i].move[3] = true;
+							if(CBoard.tileOnBoard[3,i]!= null){
+								if(CBoard.tileOnBoard[2,i].grade == CBoard.tileOnBoard[3,i].grade){
+									if(CBoard.tileOnBoard[j,i] != null && j >=3){
+										CBoard.tileOnBoard[j,i].move[3] = true;
+										CBoard.tileOnBoard[3,i].combine[3] = true;
+									} 
 								}
 							}
 						}
@@ -249,7 +270,7 @@ public class manager : MonoBehaviour {
 		GameObject background = GameObject.FindWithTag("Background");
 		tile CTile;
 		board CBoard;
-
+		Debug.Log("UpdateTilesOnBoard");
 		weapons = GameObject.FindGameObjectsWithTag("WeaponTile");
 		CBoard = background.GetComponent<board>();
 		// for 너무 많이 돌지 말자. 있는거 셋팅 10이상으로  자리하고 빼자.
@@ -257,8 +278,17 @@ public class manager : MonoBehaviour {
 			int tmpGrade = 10;
 			CTile = weapon.GetComponent<tile>();
 			tmpGrade =  CTile.grade + tmpGrade;
-			CBoard.boardValue[ (int)CTile.tilePos.x, (int)CTile.tilePos.y] = tmpGrade;
-			CBoard.tileOnBoard[(int)CTile.tilePos.x, (int)CTile.tilePos.y] = CTile;
+
+			if(CTile.combined){
+				Debug.Log("부숴버려");
+				Destroy(weapon);
+			}
+			else{
+				CBoard.boardValue[ (int)CTile.tilePos.x, (int)CTile.tilePos.y] = tmpGrade;
+				CBoard.tileOnBoard[(int)CTile.tilePos.x, (int)CTile.tilePos.y] = CTile;
+			}
+			
+
 		}
 		for (int i = 0; i < row; ++i){
 			for (int j = 0; j < col; ++j){			
@@ -302,25 +332,41 @@ public class manager : MonoBehaviour {
 		foreach (GameObject weapon in weapons) {
 			Vector2 Vtor = Vector2.zero;
 			tile CTile = weapon.GetComponent<tile>();
-
 			if (CTile.move[dir]){
 				switch(dir) {
 					case 0: 
 						//weapon 의 local pos를 움직이고 weapon의 Tile 타일의 속성을 바꿔준다.
 						Vtor = -Vector2.up;
+						if(CTile.combine[dir]){
+							CTile.combine[dir] = false;
+							CTile.combined = true;
+						}
 						break;
 					case 1:
 						Vtor = Vector2.right;
+						if(CTile.combine[dir]){
+							CTile.combine[dir] = false;
+							CTile.combined = true;
+						}
 						break;
 					case 2:
 						Vtor = Vector2.up;
+						if(CTile.combine[dir]){
+							CTile.combine[dir] = false;
+							CTile.combined = true;
+						}
 						break;
 					case 3:
 						Vtor = -Vector2.right;
+						if(CTile.combine[dir]){
+							CTile.combine[dir] = false;
+							CTile.combined = true;
+						}
 						break;	
 				}
 				CTile.tilePos = CTile.tilePos + Vtor;
 				weapon.transform.localPosition = GridToWorld((int)CTile.tilePos.x , (int)CTile.tilePos.y);
+				
 			}		
 		}
 	}
