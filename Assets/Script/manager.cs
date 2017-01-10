@@ -444,8 +444,7 @@ public class manager : MonoBehaviour {
 		int grade;
 		Transform background = GameObject.FindWithTag("Background").transform;
 		// 타일 랜덤하게 하나 생성 (적에 따라 다르게 생성해야 해.) todo
-		grade = Random.Range(1,3);
-		Debug.Log(grade);
+		grade = Random.Range(1,3); // 이렇게 하면 1,2ㄱㅏ 나오네
 		GameObject summonTile = weaponTile[grade-1];
 		
 
