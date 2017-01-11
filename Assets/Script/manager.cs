@@ -352,7 +352,8 @@ public class manager : MonoBehaviour {
 	}
 	void UpdateTilesOnBoard(int state){
 		GameObject[] weapons = GameObject.FindGameObjectsWithTag("WeaponTile");
-		board CBoard = GameObject.FindWithTag("Background").GetComponent<board>();
+		GameObject boardObject = GameObject.FindWithTag("Background");
+		board CBoard = boardObject.GetComponent<board>();
 		tile CTile;
 		
 		// for 너무 많이 돌지 말자. 있는거 셋팅 10이상으로  자리하고 빼자.
@@ -368,7 +369,6 @@ public class manager : MonoBehaviour {
 				tmpGrade =  CTile.grade + tmpGrade;
 				SetThisTileInBoardValue(CBoard,CTile,tmpGrade);
 				SetThisTileInTileOnBoard(CBoard,CTile);
-				CBoard.tileOnBoard[(int)CTile.tilePos.x, (int)CTile.tilePos.y] = CTile;
 			}
 		}
 		for (int i = 0; i < row; ++i){
@@ -380,19 +380,13 @@ public class manager : MonoBehaviour {
 					SetInBoardValue(CBoard,i,j, CBoard.boardValue[i,j] - 10);
 					if(CBoard.upgrade[i,j] && state == 1){// 업그레이드
 						int nowVal = CBoard.boardValue[i,j];
+						// boardValue를 하나 플러스 쓸모 없지만 헷갈리지 않기 위해
 						nowVal = nowVal + 1;
+
 						Destroy(CBoard.tileOnBoard[i,j].gameObject);
-						
-						int gradetmp =nowVal-1;
-						GameObject summonTile = weaponTile[gradetmp];	
-						Transform backboard = GameObject.FindWithTag("Background").transform;
-						GameObject instance = Instantiate (summonTile, new Vector3 (0f,0f,0f), Quaternion.identity) as GameObject;
-						instance.transform.SetParent (backboard);
-						instance.transform.localPosition = GridToWorld(i,j);
-						instance.GetComponent<tile>().tilePos.x = (float) i;
-						instance.GetComponent<tile>().tilePos.y = (float) j;
-						instance.GetComponent<tile>().grade = nowVal;
-						CBoard.tileOnBoard[i, j] = instance.GetComponent<tile>();
+
+						// tileArry = boardValue - 1
+						SummonTile(boardObject,nowVal -1,i,j);
 
 						CBoard.upgrade[i,j] = false;
 					}
@@ -400,8 +394,20 @@ public class manager : MonoBehaviour {
 			}
 		}
 	}
-	void SummonTile(){
+	void SummonTile(GameObject boardObject , int tileArry, int x, int y){
+		GameObject instance = Instantiate (weaponTile[tileArry], new Vector3 (0f,0f,0f), Quaternion.identity) as GameObject;
+		tile CTile = instance.GetComponent<tile>();
+		board CBoard = boardObject.GetComponent<board>();
 		
+		instance.transform.SetParent (boardObject.transform);
+		instance.transform.localPosition = GridToWorld(x,y);
+		CTile.tilePos.x = (float) x;
+		CTile.tilePos.y = (float) y;
+		CTile.grade = tileArry + 1;
+
+		SetThisTileInBoardValue(CBoard,CTile,tileArry + 1);
+		SetThisTileInTileOnBoard(CBoard,CTile);
+
 	}
 	// 타일 움직이기
 	bool IsMove(GameObject weponTile, int dir){
@@ -539,11 +545,11 @@ public class manager : MonoBehaviour {
 	void Spawn(){
 		int grade;
 		int pos;
-		Transform background = GameObject.FindWithTag("Background").transform;
+		GameObject boardObject = GameObject.FindWithTag("Background");
+		Transform background = boardObject.transform;
 
 		// 타일 랜덤하게 하나 생성 (적에 따라 다르게 생성해야 해.) todo
 		grade = Random.Range(1,3); // 이렇게 하면 1,2ㄱㅏ 나오네; 짱나
-		GameObject summonTile = weaponTile[grade-1];
 		
 
 		// 랜덤한 위치에 생성하기 있으면 waitingSpawn==false로 만들지 않아서 계속 되게 만든다.
@@ -554,12 +560,7 @@ public class manager : MonoBehaviour {
 		Debug.Log(pos+ " =" + x + "," + y);
 		if(CanSpawn(x,y)){
 			// 생성한 타일을 뿌려줌
-			GameObject instance = Instantiate (summonTile, new Vector3 (0f,0f,0f), Quaternion.identity) as GameObject;
-        	instance.transform.SetParent (background);
-			instance.transform.localPosition = GridToWorld(x,y);
-			instance.GetComponent<tile>().tilePos.x = (float) x;
-			instance.GetComponent<tile>().tilePos.y = (float) y;
-			instance.GetComponent<tile>().grade =grade;
+			SummonTile(boardObject, grade-1,x,y);
 
 			//혹시 새로운게 두 개 이상일 경우도 있으니. 테스트도 포함해서.
 			newTileCount++;
