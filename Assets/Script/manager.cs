@@ -467,18 +467,47 @@ public class manager : MonoBehaviour {
 		// 위치에 있는지 확인
 		tile weaponTile;
 		
-		UpdateTilesOnBoard(0);
-		UpdateTilesMoveDir();
+		// UpdateTilesOnBoard(0);
+		// UpdateTilesMoveDir();
 
 		weaponTile = GetTileInfoOnBoard(x,y);
 		if(weaponTile == null){
 			return true;
 		}
+		
 		return false;
+
+	}
+	int CanSpawnPos(){
+		// 위치에 있는지 확인
+		board CBoard = GameObject.FindWithTag("Background").GetComponent<board>();
+		int boardpos;
+		List<int> boardposlist = new List<int>();
+
+		UpdateTilesOnBoard(0);
+		UpdateTilesMoveDir();
+		for (int i = 0; i < 4; ++i){
+            for (int j = 0; j < 4; ++j){
+				if (GetTileInfoOnBoard(i,j) == null){
+					boardposlist.Add(4 * i + j);
+				}   
+            }
+        }
+		if(boardposlist.Count==0){
+			Debug.Log("빈칸이 없다.");
+			return 0;
+		}
+		else{
+			boardpos = Random.Range(0 , boardposlist.Count);
+			Debug.Log("Max = " + boardposlist.Count + "boardpos = " + boardpos);
+			return boardposlist[boardpos];
+		}
+		
 	}
 	
 	void Spawn(){
 		int grade;
+		int pos;
 		Transform background = GameObject.FindWithTag("Background").transform;
 
 		// 타일 랜덤하게 하나 생성 (적에 따라 다르게 생성해야 해.) todo
@@ -487,9 +516,11 @@ public class manager : MonoBehaviour {
 		
 
 		// 랜덤한 위치에 생성하기 있으면 waitingSpawn==false로 만들지 않아서 계속 되게 만든다.
-		int x = Random.Range(0,row);
-		int y = Random.Range(0,col);
-		
+		pos = CanSpawnPos ();
+		int x = pos / 4;
+		int y = pos % 4;
+
+		Debug.Log(pos+ " =" + x + "," + y);
 		if(CanSpawn(x,y)){
 			// 생성한 타일을 뿌려줌
 			GameObject instance = Instantiate (summonTile, new Vector3 (0f,0f,0f), Quaternion.identity) as GameObject;
