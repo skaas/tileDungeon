@@ -137,11 +137,15 @@ public class manager : MonoBehaviour {
 
 		for (int i = 0; i < 4; ++i){
             for (int j = 0; j < 4; ++j){
-                CBoard.boardValue[i,j] = 0;   
-				CBoard.tileOnBoard[i,j] = null;
-				CBoard.upgrade[i,j] = false;
+				NoTileOnBoard(CBoard, i,j);
             }
         }
+	}
+
+	void NoTileOnBoard(board CBoard, int x, int y){
+		CBoard.boardValue[x,y] = 0;   
+		CBoard.tileOnBoard[x,y] = null;
+		CBoard.upgrade[x,y] = false;
 	}
 	void TileMoveInit(tile CTile){
 		for(int dir = 0; dir < 4 ; ++dir){
@@ -164,18 +168,6 @@ public class manager : MonoBehaviour {
 		
 		for (int i = 0; i < col; ++i){
 			for (int j = 0; j < row; ++j){
-				// dir - 0
-				//CBoard.tileOnBoard[i,0],CBoard.tileOnBoard[i,1],CBoard.tileOnBoard[i,2],CBoard.tileOnBoard[i,3]
-				//CBoard.tileOnBoard[i,j].move[0]
-				// dir - 1
-				// CBoard.tileOnBoard[3,i],CBoard.tileOnBoard[2,i],CBoard.tileOnBoard[1,i],CBoard.tileOnBoard[0,i]
-				// CBoard.tileOnBoard[3-j,i].move[1]
-				// dir - 2
-				// CBoard.tileOnBoard[i,3],CBoard.tileOnBoard[i,2],CBoard.tileOnBoard[i,1],CBoard.tileOnBoard[i,0]
-				// CBoard.tileOnBoard[i,3-j].mobe[2]
-				// dir - 3
-				// CBoard.tileOnBoard[0,i],CBoard.tileOnBoard[1,i],CBoard.tileOnBoard[2,i],CBoard.tileOnBoard[3,i]
-				// CBoard.tileOnBoard[j,i].move[3] = true;
 				if(CBoard.tileOnBoard[i,0] == null){
 					if(CBoard.tileOnBoard[i,j] != null && j >=1 ) CBoard.tileOnBoard[i,j].move[0] = true;
 				}
@@ -323,6 +315,7 @@ public class manager : MonoBehaviour {
 		}
 		SetCanMove();		
 	}
+
 	void SetCanMove(){
 		board CBoard = GameObject.FindWithTag("Background").GetComponent<board>();
 		for(int k = 0; k < 4 ; ++k){
@@ -336,33 +329,52 @@ public class manager : MonoBehaviour {
 			}
 		}	
 	}
+
+	bool CheckTileUpgrade(tile CTile){
+		if(CTile.combined){
+			return true;
+		}
+		return false;
+		
+	}
+	void SetUpgradeBoard(board CBoard, tile CTile){
+		CBoard.upgrade[(int)CTile.tilePos.x, (int)CTile.tilePos.y] = true;
+	}
+
+	void SetThisTileInBoardValue(board CBoard, tile CTile, int grade){
+		CBoard.boardValue[ (int)CTile.tilePos.x, (int)CTile.tilePos.y] = grade;
+	}
+	void SetInBoardValue(board CBoard, int x, int y, int grade){
+		CBoard.boardValue[x, y] = grade;
+	}
+	void SetThisTileInTileOnBoard(board CBoard, tile CTile){
+		CBoard.tileOnBoard[(int)CTile.tilePos.x, (int)CTile.tilePos.y] = CTile;
+	}
 	void UpdateTilesOnBoard(int state){
-		GameObject[] weapons;
-		tile CTile;
+		GameObject[] weapons = GameObject.FindGameObjectsWithTag("WeaponTile");
 		board CBoard = GameObject.FindWithTag("Background").GetComponent<board>();
-		weapons = GameObject.FindGameObjectsWithTag("WeaponTile");
+		tile CTile;
+		
 		// for 너무 많이 돌지 말자. 있는거 셋팅 10이상으로  자리하고 빼자.
 		foreach (GameObject weapon in weapons) {
 			int tmpGrade = 10;
-			CTile = weapon.GetComponent<tile>();
-			tmpGrade =  CTile.grade + tmpGrade;
-			if(CTile.combined){
-				CBoard.upgrade[(int)CTile.tilePos.x, (int)CTile.tilePos.y] = true;
-				Destroy(weapon);
+			CTile = weapon.GetComponent<tile>();	
+			
+			if( CheckTileUpgrade(CTile) ){
+				SetUpgradeBoard(CBoard, CTile);
+				Destroy(CTile.gameObject);
 			}
 			else{
-				CBoard.boardValue[ (int)CTile.tilePos.x, (int)CTile.tilePos.y] = tmpGrade;
+				tmpGrade =  CTile.grade + tmpGrade;
+				SetThisTileInBoardValue(CBoard,CTile,tmpGrade);
+				SetThisTileInTileOnBoard(CBoard,CTile);
 				CBoard.tileOnBoard[(int)CTile.tilePos.x, (int)CTile.tilePos.y] = CTile;
 			}
-			
-
 		}
 		for (int i = 0; i < row; ++i){
 			for (int j = 0; j < col; ++j){			
 				if(CBoard.boardValue[i,j] <= 10){
-					CBoard.boardValue[i,j] = 0;
-					CBoard.tileOnBoard[i,j] = null;
-					CBoard.upgrade[i,j] = false;
+					NoTileOnBoard(CBoard,i,j);
 				}
 				else{
 					CBoard.boardValue[i,j] = CBoard.boardValue[i,j] - 10;
