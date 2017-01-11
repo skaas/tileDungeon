@@ -39,7 +39,7 @@ public class manager : MonoBehaviour {
 
 	public GameObject board; 
 	public GameObject[] weaponTile; 
-	public GameObject[] monster; 
+	public GameObject[] monsterTile; 
 	private Transform boardHolder;
 	// Use this for initialization
 	void Awake () { 
@@ -161,13 +161,15 @@ public class manager : MonoBehaviour {
 
 		CanMoveInit();
 		
-		foreach (GameObject weapon in weapons) {	
+		foreach (GameObject weapon in weapons) {
+	
 			CTile = weapon.GetComponent<tile>();
 			TileMoveInit(CTile);
 		}
 		
 		for (int i = 0; i < col; ++i){
 			for (int j = 0; j < row; ++j){
+				// dir - 0
 				if(CBoard.tileOnBoard[i,0] == null){
 					if(CBoard.tileOnBoard[i,j] != null && j >=1 ) CBoard.tileOnBoard[i,j].move[0] = true;
 				}
@@ -175,8 +177,10 @@ public class manager : MonoBehaviour {
 					if(CBoard.tileOnBoard[i,1] == null){
 						if(CBoard.tileOnBoard[i,j] != null  && j >= 2) CBoard.tileOnBoard[i,j].move[0] = true;
 					}
-					else if( CBoard.tileOnBoard[i,0].grade == CBoard.tileOnBoard[i,1].grade ){
+					else if( CBoard.tileOnBoard[i,0].grade == CBoard.tileOnBoard[i,1].grade){
 						if(CBoard.tileOnBoard[i,j] != null  && j >=1) {
+							
+							Debug.Log("i = " + 1 + ",j = " + j + ",grade = " + CBoard.tileOnBoard[i,j].grade);
 							CBoard.tileOnBoard[i,j].move[0] = true;
 							CBoard.tileOnBoard[i,1].combine[0] = true;
 						}
@@ -185,8 +189,9 @@ public class manager : MonoBehaviour {
 						if(CBoard.tileOnBoard[i,2] == null){
 							if(CBoard.tileOnBoard[i,j] != null  && j >=3) CBoard.tileOnBoard[i,j].move[0] = true;
 						}
-						else if(CBoard.tileOnBoard[i,1].grade == CBoard.tileOnBoard[i,2].grade ){
+						else if(CBoard.tileOnBoard[i,1].grade == CBoard.tileOnBoard[i,2].grade){
 							if(CBoard.tileOnBoard[i,j] != null  && j >= 2){
+								Debug.Log("2");
 								CBoard.tileOnBoard[i,j].move[0] = true;
 								CBoard.tileOnBoard[i,2].combine[0] = true;
 							} 
@@ -195,6 +200,7 @@ public class manager : MonoBehaviour {
 							if(CBoard.tileOnBoard[i,3]!= null){
 								if(CBoard.tileOnBoard[i,2].grade == CBoard.tileOnBoard[i,3].grade){
 									if(CBoard.tileOnBoard[i,j]  != null && j >=3){
+										Debug.Log("3");
 										CBoard.tileOnBoard[i,j].move[0] = true;
 										CBoard.tileOnBoard[i,3].combine[0] = true;
 									} 
@@ -211,7 +217,7 @@ public class manager : MonoBehaviour {
 					if(CBoard.tileOnBoard[2,i] == null){
 						if(CBoard.tileOnBoard[3-j,i]!= null && j >= 2) CBoard.tileOnBoard[3-j,i].move[1] = true;
 					}
-					else if( CBoard.tileOnBoard[3,i].grade == CBoard.tileOnBoard[2,i].grade ){
+					else if( CBoard.tileOnBoard[3,i].grade == CBoard.tileOnBoard[2,i].grade){
 						if(CBoard.tileOnBoard[3-j,i]!= null && j >=1) {
 							CBoard.tileOnBoard[3-j,i].move[1] = true;
 							CBoard.tileOnBoard[2,i].combine[1] = true;
@@ -341,8 +347,8 @@ public class manager : MonoBehaviour {
 		CBoard.upgrade[(int)CTile.tilePos.x, (int)CTile.tilePos.y] = true;
 	}
 
-	void SetThisTileInBoardValue(board CBoard, tile CTile, int grade){
-		CBoard.boardValue[ (int)CTile.tilePos.x, (int)CTile.tilePos.y] = grade;
+	void SetThisTileInBoardValue(board CBoard, tile CTile, int val){
+		CBoard.boardValue[ (int)CTile.tilePos.x, (int)CTile.tilePos.y] = val;
 	}
 	void SetInBoardValue(board CBoard, int x, int y, int val){
 		CBoard.boardValue[x, y] = val;
@@ -358,7 +364,7 @@ public class manager : MonoBehaviour {
 		
 		// for 너무 많이 돌지 말자. 있는거 셋팅 10이상으로  자리하고 빼자.
 		foreach (GameObject weapon in weapons) {
-			int tmpGrade = 10;
+			int tmpVal = 10;
 			CTile = weapon.GetComponent<tile>();	
 			
 			if( CheckTileUpgrade(CTile) ){
@@ -366,27 +372,22 @@ public class manager : MonoBehaviour {
 				Destroy(CTile.gameObject);
 			}
 			else{
-				tmpGrade =  CTile.grade + tmpGrade;
-				SetThisTileInBoardValue(CBoard,CTile,tmpGrade);
+				tmpVal =  1 + tmpVal;
+				SetThisTileInBoardValue(CBoard,CTile,tmpVal);
 				SetThisTileInTileOnBoard(CBoard,CTile);
 			}
 		}
 		for (int i = 0; i < row; ++i){
-			for (int j = 0; j < col; ++j){			
+			for (int j = 0; j < col; ++j){
 				if(CBoard.boardValue[i,j] <= 10){
 					NoTileOnBoardXY(CBoard,i,j);
 				}
 				else{
 					SetInBoardValue(CBoard,i,j, CBoard.boardValue[i,j] - 10);
 					if(CBoard.upgrade[i,j] && state == 1){// 업그레이드
-						int nowVal = CBoard.boardValue[i,j];
-						// boardValue를 하나 플러스 쓸모 없지만 헷갈리지 않기 위해
-						nowVal = nowVal + 1;
-
+						int nowGrade = CBoard.tileOnBoard[i,j].grade;
 						Destroy(CBoard.tileOnBoard[i,j].gameObject);
-
-						// tileArry = boardValue - 1
-						SummonTile(boardObject,nowVal -1,i,j);
+						SummonTile(boardObject,nowGrade ,i,j);
 
 						CBoard.upgrade[i,j] = false;
 					}
@@ -395,7 +396,24 @@ public class manager : MonoBehaviour {
 		}
 	}
 	void SummonTile(GameObject boardObject , int tileArry, int x, int y){
-		GameObject instance = Instantiate (weaponTile[tileArry], new Vector3 (0f,0f,0f), Quaternion.identity) as GameObject;
+		int isMonster;
+		isMonster = 0; //(int) Random.Range(0,2);
+		GameObject summonTile;
+		GameObject instance;
+		int hp = 0; //몬스터일때만
+		int attackValue = 0; //몬스터 일때만 
+		int grade = tileArry + 1;
+		if(isMonster == 0){
+			summonTile = weaponTile[tileArry];
+		}
+		else{
+			summonTile = monsterTile[0];
+			hp = 1;
+			attackValue = 1;
+			grade = 100;
+		}
+		
+		instance = Instantiate (summonTile, new Vector3 (0f,0f,0f), Quaternion.identity) as GameObject;
 		tile CTile = instance.GetComponent<tile>();
 		board CBoard = boardObject.GetComponent<board>();
 		
@@ -403,9 +421,11 @@ public class manager : MonoBehaviour {
 		instance.transform.localPosition = GridToWorld(x,y);
 		CTile.tilePos.x = (float) x;
 		CTile.tilePos.y = (float) y;
-		CTile.grade = tileArry + 1;
+		CTile.grade = grade;
+		CTile.hp = hp;
+		CTile.attackValue = attackValue;
 
-		SetThisTileInBoardValue(CBoard,CTile,tileArry + 1);
+		SetThisTileInBoardValue(CBoard,CTile,1);
 		SetThisTileInTileOnBoard(CBoard,CTile);
 
 	}
