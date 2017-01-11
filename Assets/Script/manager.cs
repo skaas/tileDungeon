@@ -106,9 +106,6 @@ public class manager : MonoBehaviour {
 	}
 
 	void GameStart(){
-		GameObject background = GameObject.FindWithTag("Background");
-		GameObject[] weapons  = GameObject.FindGameObjectsWithTag("WeaponTile");
-		board CBoard = background.GetComponent<board>();
 		// 시작 변수
 		waitingInput = true;
 		waitingSpawn = false;
@@ -119,10 +116,23 @@ public class manager : MonoBehaviour {
 		canMove[2] = false;
 		canMove[3] = false;
 		
+		ClearBoard();
+		
+		// 생성
+		Spawn();
+		//
+	}
+	void ClearBoard(){
+		GameObject[] weapons  = GameObject.FindGameObjectsWithTag("WeaponTile");
+		GameObject background = GameObject.FindWithTag("Background");
+		board CBoard = background.GetComponent<board>();
 
+		// 타일 삭제
 		foreach (GameObject weapon in weapons) {
 			Destroy(weapon);
 		}
+		// 보드 초기화
+
 		for (int i = 0; i < 4; ++i){
             for (int j = 0; j < 4; ++j){
                 CBoard.boardValue[i,j] = 0;   
@@ -130,11 +140,7 @@ public class manager : MonoBehaviour {
 				CBoard.upgrade[i,j] = false;
             }
         }
-		
-		Spawn();
-		//
 	}
-	
 	void UpdateTilesMoveDir(){
 		GameObject background = GameObject.FindWithTag("Background");
 		GameObject[] weapons;
