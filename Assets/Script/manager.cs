@@ -111,16 +111,18 @@ public class manager : MonoBehaviour {
 		waitingSpawn = false;
 		earnedGolds = 0;
 		earnedKeys = 0;
-		canMove[0] = false;
-		canMove[1] = false;
-		canMove[2] = false;
-		canMove[3] = false;
-		
+		CanMoveInit();
 		ClearBoard();
 		
 		// 생성
 		Spawn();
 		//
+	}
+	void CanMoveInit(){
+		canMove[0] = false;
+		canMove[1] = false;
+		canMove[2] = false;
+		canMove[3] = false;
 	}
 	void ClearBoard(){
 		GameObject[] weapons  = GameObject.FindGameObjectsWithTag("WeaponTile");
@@ -143,18 +145,12 @@ public class manager : MonoBehaviour {
 	}
 	void UpdateTilesMoveDir(){
 		GameObject background = GameObject.FindWithTag("Background");
-		GameObject[] weapons;
-		board CBoard;
+		GameObject[] weapons = GameObject.FindGameObjectsWithTag("WeaponTile");
+		board CBoard = background.GetComponent<board>();;
 		tile CTile;
 
-		canMove[0] = false;
-		canMove[1] = false;
-		canMove[2] = false;
-		canMove[3] = false;
+		CanMoveInit();
 
-		CBoard = background.GetComponent<board>();
-		
-		weapons = GameObject.FindGameObjectsWithTag("WeaponTile");
 		
 		foreach (GameObject weapon in weapons) {	
 			CTile = weapon.GetComponent<tile>();
