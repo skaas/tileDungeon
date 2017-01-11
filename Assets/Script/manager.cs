@@ -49,18 +49,19 @@ public class manager : MonoBehaviour {
 		GameObject instance = Instantiate (board, new Vector3 (0f,0f,0f), Quaternion.identity) as GameObject;
         instance.transform.SetParent (boardHolder);
 		instance.transform.position = new Vector3 (-2.82f,-4.34f,0f);
-		canMove[0] = false;
-		canMove[1] = false;
-		canMove[2] = false;
-		canMove[3] = false;
+		
 		// 게임 시작
 		GameStart();
 	}
 	
 	// Update is called once per frame
 	void Update () {
+		if(boardFilled){
+			Debug.Log("게임 종료 스페이스를 누르면 게임을 재식작합니다.");		
+		}
 		if(waitingSpawn){
 			Spawn();
+			IsGameOver();
 		}
 		if(waitingInput){
 			if(Input.GetKeyUp(KeyCode.UpArrow)){
@@ -96,17 +97,40 @@ public class manager : MonoBehaviour {
 				}
 				else Debug.Log("못움직여");
 			}
+			if(Input.GetKeyDown(KeyCode.Space)){
+				boardFilled = false;
+				GameStart();
+			}
 			
 		}			
 	}
 
 	void GameStart(){
-		
+		GameObject background = GameObject.FindWithTag("Background");
+		GameObject[] weapons  = GameObject.FindGameObjectsWithTag("WeaponTile");
+		board CBoard = background.GetComponent<board>();
 		// 시작 변수
 		waitingInput = true;
 		waitingSpawn = false;
 		earnedGolds = 0;
 		earnedKeys = 0;
+		canMove[0] = false;
+		canMove[1] = false;
+		canMove[2] = false;
+		canMove[3] = false;
+		
+
+		foreach (GameObject weapon in weapons) {
+			Destroy(weapon);
+		}
+		for (int i = 0; i < 4; ++i){
+            for (int j = 0; j < 4; ++j){
+                CBoard.boardValue[i,j] = 0;   
+				CBoard.tileOnBoard[i,j] = null;
+				CBoard.upgrade[i,j] = false;
+            }
+        }
+		
 		Spawn();
 		//
 	}
@@ -367,7 +391,18 @@ public class manager : MonoBehaviour {
 
 		return false;
 	}
+	void IsGameOver(){
+		GameObject background = GameObject.FindWithTag("Background");
+		board CBoard = background.GetComponent<board>();
+		bool moveCheck;
+        
+		moveCheck = canMove[0] || canMove[1] || canMove[2]|| canMove[3];
 
+		if(moveCheck == false){
+			boardFilled = true;
+		}
+
+	}
 	public void Move(int dir) {
 		//0:up, 1:Right, 2:down, 3:Left
 		
@@ -431,8 +466,10 @@ public class manager : MonoBehaviour {
 	bool CanSpawn(int x , int y){
 		// 위치에 있는지 확인
 		tile weaponTile;
+		
 		UpdateTilesOnBoard(0);
 		UpdateTilesMoveDir();
+
 		weaponTile = GetTileInfoOnBoard(x,y);
 		if(weaponTile == null){
 			return true;
@@ -443,8 +480,9 @@ public class manager : MonoBehaviour {
 	void Spawn(){
 		int grade;
 		Transform background = GameObject.FindWithTag("Background").transform;
+
 		// 타일 랜덤하게 하나 생성 (적에 따라 다르게 생성해야 해.) todo
-		grade = Random.Range(1,3); // 이렇게 하면 1,2ㄱㅏ 나오네
+		grade = Random.Range(1,3); // 이렇게 하면 1,2ㄱㅏ 나오네; 짱나
 		GameObject summonTile = weaponTile[grade-1];
 		
 
