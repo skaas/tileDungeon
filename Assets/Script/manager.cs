@@ -484,15 +484,10 @@ public class manager : MonoBehaviour {
 	}
 	bool CanSpawn(int x , int y){
 		// 위치에 있는지 확인
-		tile weaponTile;
-
-		weaponTile = GetTileInfoOnBoard(x,y);
-		if(weaponTile == null){
+		if(GetTileInfoOnBoard(x,y) == null){
 			return true;
 		}
-		
 		return false;
-
 	}
 	int CanSpawnPos(){
 		// 위치에 있는지 확인
@@ -500,6 +495,7 @@ public class manager : MonoBehaviour {
 		int boardpos;
 		List<int> boardposlist = new List<int>();
 
+		//움직임이 끝난 타이밍을 잡고 싶은데 애매하다. 그래서 생성하기 전에 업데이트 움직임 --> 생성
 		UpdateTilesOnBoard(0);
 		UpdateTilesMoveDir();
 		for (int i = 0; i < 4; ++i){
