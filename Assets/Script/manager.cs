@@ -137,12 +137,12 @@ public class manager : MonoBehaviour {
 
 		for (int i = 0; i < 4; ++i){
             for (int j = 0; j < 4; ++j){
-				NoTileOnBoard(CBoard, i,j);
+				NoTileOnBoardXY(CBoard, i,j);
             }
         }
 	}
 
-	void NoTileOnBoard(board CBoard, int x, int y){
+	void NoTileOnBoardXY(board CBoard, int x, int y){
 		CBoard.boardValue[x,y] = 0;   
 		CBoard.tileOnBoard[x,y] = null;
 		CBoard.upgrade[x,y] = false;
@@ -344,8 +344,8 @@ public class manager : MonoBehaviour {
 	void SetThisTileInBoardValue(board CBoard, tile CTile, int grade){
 		CBoard.boardValue[ (int)CTile.tilePos.x, (int)CTile.tilePos.y] = grade;
 	}
-	void SetInBoardValue(board CBoard, int x, int y, int grade){
-		CBoard.boardValue[x, y] = grade;
+	void SetInBoardValue(board CBoard, int x, int y, int val){
+		CBoard.boardValue[x, y] = val;
 	}
 	void SetThisTileInTileOnBoard(board CBoard, tile CTile){
 		CBoard.tileOnBoard[(int)CTile.tilePos.x, (int)CTile.tilePos.y] = CTile;
@@ -374,15 +374,16 @@ public class manager : MonoBehaviour {
 		for (int i = 0; i < row; ++i){
 			for (int j = 0; j < col; ++j){			
 				if(CBoard.boardValue[i,j] <= 10){
-					NoTileOnBoard(CBoard,i,j);
+					NoTileOnBoardXY(CBoard,i,j);
 				}
 				else{
-					CBoard.boardValue[i,j] = CBoard.boardValue[i,j] - 10;
+					SetInBoardValue(CBoard,i,j, CBoard.boardValue[i,j] - 10);
 					if(CBoard.upgrade[i,j] && state == 1){// 업그레이드
-						CBoard.boardValue[i,j] = CBoard.boardValue[i,j] + 1;
+						int nowVal = CBoard.boardValue[i,j];
+						nowVal = nowVal + 1;
 						Destroy(CBoard.tileOnBoard[i,j].gameObject);
 						
-						int gradetmp = CBoard.boardValue[i,j]-1;
+						int gradetmp =nowVal-1;
 						GameObject summonTile = weaponTile[gradetmp];	
 						Transform backboard = GameObject.FindWithTag("Background").transform;
 						GameObject instance = Instantiate (summonTile, new Vector3 (0f,0f,0f), Quaternion.identity) as GameObject;
@@ -390,7 +391,7 @@ public class manager : MonoBehaviour {
 						instance.transform.localPosition = GridToWorld(i,j);
 						instance.GetComponent<tile>().tilePos.x = (float) i;
 						instance.GetComponent<tile>().tilePos.y = (float) j;
-						instance.GetComponent<tile>().grade = CBoard.boardValue[i,j];
+						instance.GetComponent<tile>().grade = nowVal;
 						CBoard.tileOnBoard[i, j] = instance.GetComponent<tile>();
 
 						CBoard.upgrade[i,j] = false;
@@ -399,7 +400,9 @@ public class manager : MonoBehaviour {
 			}
 		}
 	}
-	
+	void SummonTile(){
+		
+	}
 	// 타일 움직이기
 	bool IsMove(GameObject weponTile, int dir){
 		switch(dir) {
