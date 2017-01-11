@@ -143,6 +143,12 @@ public class manager : MonoBehaviour {
             }
         }
 	}
+	void TileMoveInit(tile CTile){
+		for(int dir = 0; dir < 4 ; ++dir){
+				CTile.move[dir] = false;
+				CTile.combine[dir] = false;
+			}	
+	}
 	void UpdateTilesMoveDir(){
 		GameObject background = GameObject.FindWithTag("Background");
 		GameObject[] weapons = GameObject.FindGameObjectsWithTag("WeaponTile");
@@ -150,20 +156,26 @@ public class manager : MonoBehaviour {
 		tile CTile;
 
 		CanMoveInit();
-
 		
 		foreach (GameObject weapon in weapons) {	
 			CTile = weapon.GetComponent<tile>();
-			for(int dir = 0; dir < 4 ; ++dir){
-				CTile.move[dir] = false;
-				CTile.combine[dir] = false;
-			}	
+			TileMoveInit(CTile);
 		}
 		
 		for (int i = 0; i < col; ++i){
 			for (int j = 0; j < row; ++j){
 				// dir - 0
-				
+				//CBoard.tileOnBoard[i,0],CBoard.tileOnBoard[i,1],CBoard.tileOnBoard[i,2],CBoard.tileOnBoard[i,3]
+				//CBoard.tileOnBoard[i,j].move[0]
+				// dir - 1
+				// CBoard.tileOnBoard[3,i],CBoard.tileOnBoard[2,i],CBoard.tileOnBoard[1,i],CBoard.tileOnBoard[0,i]
+				// CBoard.tileOnBoard[3-j,i].move[1]
+				// dir - 2
+				// CBoard.tileOnBoard[i,3],CBoard.tileOnBoard[i,2],CBoard.tileOnBoard[i,1],CBoard.tileOnBoard[i,0]
+				// CBoard.tileOnBoard[i,3-j].mobe[2]
+				// dir - 3
+				// CBoard.tileOnBoard[0,i],CBoard.tileOnBoard[1,i],CBoard.tileOnBoard[2,i],CBoard.tileOnBoard[3,i]
+				// CBoard.tileOnBoard[j,i].move[3] = true;
 				if(CBoard.tileOnBoard[i,0] == null){
 					if(CBoard.tileOnBoard[i,j] != null && j >=1 ) CBoard.tileOnBoard[i,j].move[0] = true;
 				}
@@ -309,6 +321,10 @@ public class manager : MonoBehaviour {
 				}
 			}
 		}
+		SetCanMove();		
+	}
+	void SetCanMove(){
+		board CBoard = GameObject.FindWithTag("Background").GetComponent<board>();
 		for(int k = 0; k < 4 ; ++k){
 			for(int l = 0 ; l < 4; ++l){
 				if(CBoard.tileOnBoard[k,l] != null ){
@@ -318,15 +334,13 @@ public class manager : MonoBehaviour {
 					canMove[3] = canMove[3] || CBoard.tileOnBoard[k,l].move[3];
 				}
 			}
-		}			
+		}	
 	}
 	void UpdateTilesOnBoard(int state){
 		GameObject[] weapons;
-		GameObject background = GameObject.FindWithTag("Background");
 		tile CTile;
-		board CBoard;
+		board CBoard = GameObject.FindWithTag("Background").GetComponent<board>();
 		weapons = GameObject.FindGameObjectsWithTag("WeaponTile");
-		CBoard = background.GetComponent<board>();
 		// for 너무 많이 돌지 말자. 있는거 셋팅 10이상으로  자리하고 빼자.
 		foreach (GameObject weapon in weapons) {
 			int tmpGrade = 10;
