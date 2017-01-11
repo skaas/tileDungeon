@@ -409,25 +409,7 @@ public class manager : MonoBehaviour {
 		SetThisTileInTileOnBoard(CBoard,CTile);
 
 	}
-	// 타일 움직이기
-	bool IsMove(GameObject weponTile, int dir){
-		switch(dir) {
-			case 0: 
-				if ( weponTile.GetComponent<tile>().tilePos.y > 0) return true;
-				break;
-			case 1:
-				if ( weponTile.GetComponent<tile>().tilePos.x < 3) return true;
-				break;
-			case 2:
-				if ( weponTile.GetComponent<tile>().tilePos.y < 3) return true;
-				break;
-			case 3:
-				if ( weponTile.GetComponent<tile>().tilePos.x > 0) return true;
-				break;	
-		}
-
-		return false;
-	}
+	// 타일 움직이기xw
 	void IsGameOver(){
 		GameObject background = GameObject.FindWithTag("Background");
 		board CBoard = background.GetComponent<board>();
@@ -503,9 +485,6 @@ public class manager : MonoBehaviour {
 	bool CanSpawn(int x , int y){
 		// 위치에 있는지 확인
 		tile weaponTile;
-		
-		// UpdateTilesOnBoard(0);
-		// UpdateTilesMoveDir();
 
 		weaponTile = GetTileInfoOnBoard(x,y);
 		if(weaponTile == null){
