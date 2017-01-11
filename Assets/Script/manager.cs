@@ -484,9 +484,7 @@ public class manager : MonoBehaviour {
 	}
 	bool CanSpawn(int x , int y){
 		// 위치에 있는지 확인
-		if(GetTileInfoOnBoard(x,y) == null){
-			return true;
-		}
+		if(GetTileInfoOnBoard(x,y) == null) return true;
 		return false;
 	}
 	int CanSpawnPos(){
@@ -498,6 +496,7 @@ public class manager : MonoBehaviour {
 		//움직임이 끝난 타이밍을 잡고 싶은데 애매하다. 그래서 생성하기 전에 업데이트 움직임 --> 생성
 		UpdateTilesOnBoard(0);
 		UpdateTilesMoveDir();
+		//----------------------------------------------------------------------
 		for (int i = 0; i < 4; ++i){
             for (int j = 0; j < 4; ++j){
 				if (GetTileInfoOnBoard(i,j) == null){
@@ -507,11 +506,12 @@ public class manager : MonoBehaviour {
         }
 		if(boardposlist.Count==0){
 			Debug.Log("빈칸이 없다.");
+			// 가끔씩 여기 걸리는데 찾기 귀찮아서 예외처리.
 			return 0;
 		}
 		else{
+			//빈칸중에 랜덤하게 리턴
 			boardpos = Random.Range(0 , boardposlist.Count);
-			Debug.Log("Max = " + boardposlist.Count + "boardpos = " + boardpos);
 			return boardposlist[boardpos];
 		}
 		
@@ -532,9 +532,8 @@ public class manager : MonoBehaviour {
 		int x = pos / 4;
 		int y = pos % 4;
 
-		Debug.Log(pos+ " =" + x + "," + y);
 		if(CanSpawn(x,y)){
-			// 생성한 타일을 뿌려줌
+			//타일을 뿌려줌
 			SummonTile(boardObject, grade-1,x,y);
 
 			//혹시 새로운게 두 개 이상일 경우도 있으니. 테스트도 포함해서.
