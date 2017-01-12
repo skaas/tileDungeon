@@ -141,8 +141,12 @@ public class manager : MonoBehaviour {
             }
         }
 	}
-	bool isMonster(tile CTile){
-		if(CTile.hp > 0) return true;
+
+	bool isCombine (tile CTile, tile DTile){
+		if(CTile.hp > 0 && DTile.hp > 0) return false; //둘다 몬스터야. 합쳐지지 마
+		else if(CTile.hp == 0 && DTile.hp > 0) return true; // 하나만 몬스터야 괜찮아.
+		else if(CTile.hp > 0 && DTile.hp == 0) return true; //하나만 몬스터야 괜찮아.
+		else if(CTile.grade == DTile.grade) return true;//둘다 몬스터 아냐 && 그래이드가 같으면
 		return false;
 	}
 	void NoTileOnBoardXY(board CBoard, int x, int y){
@@ -180,7 +184,7 @@ public class manager : MonoBehaviour {
 					if(CBoard.tileOnBoard[i,1] == null){
 						if(CBoard.tileOnBoard[i,j] != null  && j >= 2) CBoard.tileOnBoard[i,j].move[0] = true;
 					}
-					else if( CBoard.tileOnBoard[i,0].grade == CBoard.tileOnBoard[i,1].grade || isMonster(CBoard.tileOnBoard[i,0]) || isMonster(CBoard.tileOnBoard[i,1] )){
+					else if( isCombine(CBoard.tileOnBoard[i,0], CBoard.tileOnBoard[i,1])){
 						if(CBoard.tileOnBoard[i,j] != null  && j >=1) {
 							CBoard.tileOnBoard[i,j].move[0] = true;
 							CBoard.tileOnBoard[i,1].combine[0] = true;
@@ -190,7 +194,7 @@ public class manager : MonoBehaviour {
 						if(CBoard.tileOnBoard[i,2] == null){
 							if(CBoard.tileOnBoard[i,j] != null  && j >=3) CBoard.tileOnBoard[i,j].move[0] = true;
 						}
-						else if(CBoard.tileOnBoard[i,1].grade == CBoard.tileOnBoard[i,2].grade || isMonster(CBoard.tileOnBoard[i,1]) || isMonster(CBoard.tileOnBoard[i,2]) ){
+						else if( isCombine(CBoard.tileOnBoard[i,1], CBoard.tileOnBoard[i,2])){
 							if(CBoard.tileOnBoard[i,j] != null  && j >= 2){
 								Debug.Log("2");
 								CBoard.tileOnBoard[i,j].move[0] = true;
@@ -199,7 +203,7 @@ public class manager : MonoBehaviour {
 						}
 						else{
 							if(CBoard.tileOnBoard[i,3]!= null){
-								if(CBoard.tileOnBoard[i,2].grade == CBoard.tileOnBoard[i,3].grade || isMonster(CBoard.tileOnBoard[i,2]) || isMonster(CBoard.tileOnBoard[i,3])){
+								if(isCombine(CBoard.tileOnBoard[i,2],CBoard.tileOnBoard[i,3])){
 									if(CBoard.tileOnBoard[i,j]  != null && j >=3){
 										Debug.Log("3");
 										CBoard.tileOnBoard[i,j].move[0] = true;
@@ -218,7 +222,7 @@ public class manager : MonoBehaviour {
 					if(CBoard.tileOnBoard[2,i] == null){
 						if(CBoard.tileOnBoard[3-j,i]!= null && j >= 2) CBoard.tileOnBoard[3-j,i].move[1] = true;
 					}
-					else if( CBoard.tileOnBoard[3,i].grade == CBoard.tileOnBoard[2,i].grade || isMonster(CBoard.tileOnBoard[3,i]) || isMonster(CBoard.tileOnBoard[2,i]) ){
+					else if( isCombine(CBoard.tileOnBoard[3,i], CBoard.tileOnBoard[2,i])){
 						if(CBoard.tileOnBoard[3-j,i]!= null && j >=1) {
 							CBoard.tileOnBoard[3-j,i].move[1] = true;
 							CBoard.tileOnBoard[2,i].combine[1] = true;
@@ -228,7 +232,7 @@ public class manager : MonoBehaviour {
 						if(CBoard.tileOnBoard[1,i] == null){
 							if(CBoard.tileOnBoard[3-j,i]!= null && j >=3) CBoard.tileOnBoard[3-j,i].move[1] = true;
 						}
-						else if(CBoard.tileOnBoard[2,i].grade == CBoard.tileOnBoard[1,i].grade || isMonster(CBoard.tileOnBoard[2,i]) || isMonster(CBoard.tileOnBoard[1,i]) ){
+						else if(isCombine(CBoard.tileOnBoard[2,i], CBoard.tileOnBoard[1,i])){
 							if(CBoard.tileOnBoard[3-j,i]!= null && j >= 2){
 								CBoard.tileOnBoard[3-j,i].move[1] = true;
 								CBoard.tileOnBoard[1,i].combine[1] = true;
@@ -236,7 +240,7 @@ public class manager : MonoBehaviour {
 						}
 						else{
 							if(CBoard.tileOnBoard[0,i]!= null){
-								if(CBoard.tileOnBoard[0,i].grade == CBoard.tileOnBoard[1,i].grade || isMonster(CBoard.tileOnBoard[0,i]) || isMonster(CBoard.tileOnBoard[1,i]) ){
+								if(isCombine( CBoard.tileOnBoard[0,i], CBoard.tileOnBoard[1,i])){
 									if(CBoard.tileOnBoard[3-j,i]!= null && j >=3){
 										CBoard.tileOnBoard[3-j,i].move[1] = true;
 										CBoard.tileOnBoard[0,i].combine[1] = true;		
@@ -254,7 +258,7 @@ public class manager : MonoBehaviour {
 					if(CBoard.tileOnBoard[i,2] == null){
 						if(CBoard.tileOnBoard[i,3-j]!= null && j >= 2) CBoard.tileOnBoard[i,3-j].move[2] = true;
 					}
-					else if( CBoard.tileOnBoard[i,2].grade == CBoard.tileOnBoard[i,3].grade || isMonster(CBoard.tileOnBoard[i,2]) || isMonster(CBoard.tileOnBoard[i,3]) ){
+					else if( isCombine(CBoard.tileOnBoard[i,2], CBoard.tileOnBoard[i,3])){
 						if(CBoard.tileOnBoard[i,3-j]!= null && j >=1){
 							CBoard.tileOnBoard[i,3-j].move[2] = true;
 							CBoard.tileOnBoard[i,2].combine[2] = true;
@@ -264,7 +268,7 @@ public class manager : MonoBehaviour {
 						if(CBoard.tileOnBoard[i,1] == null){
 							if(CBoard.tileOnBoard[i,3-j]!= null && j >=3) CBoard.tileOnBoard[i,3-j].move[2] = true;
 						}
-						else if(CBoard.tileOnBoard[i,1].grade == CBoard.tileOnBoard[i,2].grade || isMonster(CBoard.tileOnBoard[i,1]) || isMonster(CBoard.tileOnBoard[i,2]) ){
+						else if(isCombine(CBoard.tileOnBoard[i,1], CBoard.tileOnBoard[i,2]) ){
 							if(CBoard.tileOnBoard[i,3-j]!= null && j >= 2) {
 								CBoard.tileOnBoard[i,3-j].move[2] = true;
 								CBoard.tileOnBoard[i,1].combine[2] = true;
@@ -272,7 +276,7 @@ public class manager : MonoBehaviour {
 						}
 						else{
 							if(CBoard.tileOnBoard[i,0]!= null){
-								if(CBoard.tileOnBoard[i,1].grade == CBoard.tileOnBoard[i,0].grade || isMonster(CBoard.tileOnBoard[i,1]) || isMonster(CBoard.tileOnBoard[i,0]) ){
+								if(isCombine(CBoard.tileOnBoard[i,1], CBoard.tileOnBoard[i,0]) ){
 									if(CBoard.tileOnBoard[i,3-j] != null && j >=3){
 										CBoard.tileOnBoard[i,3-j].move[2] = true;
 										CBoard.tileOnBoard[i,0].combine[2] = true;
@@ -290,7 +294,7 @@ public class manager : MonoBehaviour {
 					if(CBoard.tileOnBoard[1,i] == null){
 						if(CBoard.tileOnBoard[j,i]!= null && j >= 2) CBoard.tileOnBoard[j,i].move[3] = true;
 					}
-					else if( CBoard.tileOnBoard[1,i].grade == CBoard.tileOnBoard[0,i].grade || isMonster(CBoard.tileOnBoard[1,i]) || isMonster(CBoard.tileOnBoard[0,i]) ){
+					else if( isCombine(CBoard.tileOnBoard[1,i], CBoard.tileOnBoard[0,i]) ){
 						if(CBoard.tileOnBoard[j,i] != null&& j >=1) {
 							CBoard.tileOnBoard[j,i].move[3] = true;
 							CBoard.tileOnBoard[1,i].combine[3] = true;
@@ -300,7 +304,7 @@ public class manager : MonoBehaviour {
 						if(CBoard.tileOnBoard[2,i] == null){
 							if(CBoard.tileOnBoard[j,i] != null&& j >=3) CBoard.tileOnBoard[j,i].move[3] = true;
 						}
-						else if(CBoard.tileOnBoard[2,i].grade == CBoard.tileOnBoard[1,i].grade || isMonster(CBoard.tileOnBoard[2,i]) || isMonster(CBoard.tileOnBoard[1,i]) ){
+						else if(isCombine(CBoard.tileOnBoard[2,i], CBoard.tileOnBoard[1,i]) ){
 							if(CBoard.tileOnBoard[j,i] != null&& j >= 2){
 								CBoard.tileOnBoard[j,i].move[3] = true;
 								CBoard.tileOnBoard[2,i].combine[3] = true;
@@ -308,7 +312,7 @@ public class manager : MonoBehaviour {
 						}
 						else{
 							if(CBoard.tileOnBoard[3,i]!= null){
-								if(CBoard.tileOnBoard[3,i].grade == CBoard.tileOnBoard[2,i].grade || isMonster(CBoard.tileOnBoard[3,i]) || isMonster(CBoard.tileOnBoard[2,i]) ){
+								if(isCombine(CBoard.tileOnBoard[3,i], CBoard.tileOnBoard[2,i]) ){
 									if(CBoard.tileOnBoard[j,i] != null && j >=3){
 										CBoard.tileOnBoard[j,i].move[3] = true;
 										CBoard.tileOnBoard[3,i].combine[3] = true;
