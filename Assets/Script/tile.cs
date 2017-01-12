@@ -4,7 +4,7 @@ using System.Collections;
 public class tile : MonoBehaviour {
 
 	public Vector2 tilePos;
-	public int grade;
+	public int grade; // 100번대 몬스터
 
 	///-----------monster일때만
 	public int hp = 0;

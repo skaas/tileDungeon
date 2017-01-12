@@ -45,10 +45,10 @@ public class manager : MonoBehaviour {
 	void Awake () { 
 		// background 로딩
 		boardHolder = new GameObject("baseObject").transform;
-		boardHolder.position = new Vector3 (-2.82f,-4.34f,0f);
+		boardHolder.position = new Vector3 (-2.0f,-4.2f,0f);
 		GameObject instance = Instantiate (board, new Vector3 (0f,0f,0f), Quaternion.identity) as GameObject;
         instance.transform.SetParent (boardHolder);
-		instance.transform.position = new Vector3 (-2.82f,-4.34f,0f);
+		instance.transform.position = new Vector3 (-2.0f,-4.2f,0f);
 		
 		// 게임 시작
 		GameStart();
@@ -134,7 +134,7 @@ public class manager : MonoBehaviour {
 			Destroy(weapon);
 		}
 		// 보드 초기화
-
+		Debug.Log("시작 초기화");
 		for (int i = 0; i < 4; ++i){
             for (int j = 0; j < 4; ++j){
 				NoTileOnBoardXY(CBoard, i,j);
@@ -149,10 +149,16 @@ public class manager : MonoBehaviour {
 		else if(CTile.grade == DTile.grade) return true;//둘다 몬스터 아냐 && 그래이드가 같으면
 		return false;
 	}
+	bool IsMonster(tile CTile){
+		if(CTile.hp > 0) return true;
+		return false;
+	}
 	void NoTileOnBoardXY(board CBoard, int x, int y){
 		CBoard.boardValue[x,y] = 0;   
 		CBoard.tileOnBoard[x,y] = null;
+		CBoard.upgradeMonsterTile[x,y] = null;
 		CBoard.upgrade[x,y] = false;
+		CBoard.upgradeWeaponGrade[x,y] = 0;
 	}
 	void TileMoveInit(tile CTile){
 		for(int dir = 0; dir < 4 ; ++dir){
@@ -350,6 +356,12 @@ public class manager : MonoBehaviour {
 	}
 	void SetUpgradeBoard(board CBoard, tile CTile){
 		CBoard.upgrade[(int)CTile.tilePos.x, (int)CTile.tilePos.y] = true;
+		CBoard.upgradeWeaponGrade[(int)CTile.tilePos.x, (int)CTile.tilePos.y] = CTile.grade;
+		Debug.Log("hp = " + CTile.hp);
+		if(CTile.hp > 0) {
+			
+			CBoard.upgradeMonsterTile[(int)CTile.tilePos.x, (int)CTile.tilePos.y] = CTile;
+		}
 	}
 
 	void SetThisTileInBoardValue(board CBoard, tile CTile, int val){
@@ -385,21 +397,62 @@ public class manager : MonoBehaviour {
 		for (int i = 0; i < row; ++i){
 			for (int j = 0; j < col; ++j){
 				if(CBoard.boardValue[i,j] <= 10){
+					Debug.Log("업데이트 초기화");
 					NoTileOnBoardXY(CBoard,i,j);
 				}
 				else{
 					SetInBoardValue(CBoard,i,j, CBoard.boardValue[i,j] - 10);
 					if(CBoard.upgrade[i,j] && state == 1){// 업그레이드
-						int nowGrade = CBoard.tileOnBoard[i,j].grade;
-						Destroy(CBoard.tileOnBoard[i,j].gameObject);
-						SummonTile(boardObject,nowGrade ,i,j);
+						
+						if(IsMonster(CBoard.tileOnBoard[i,j])){
+							int nowHP = CBoard.tileOnBoard[i,j].hp - CBoard.upgradeWeaponGrade[i,j];
+							if ( nowHP <= 0){
+								Destroy(CBoard.tileOnBoard[i,j].gameObject); 
+								NoTileOnBoardXY(CBoard,i,j);
+								Debug.Log("몬스터 죽음");
+								//드롭 아이템
+							}
+							else{
+								CBoard.tileOnBoard[i,j].hp = nowHP;
+								Debug.Log("맞고 죽지 않음 HP = " + nowHP);
+							}
+							CBoard.upgradeWeaponGrade[i,j] = 0;
+						}
+						else{
+							Debug.Log("(" + i+"," + j+ ")");
 
+							if(CBoard.upgradeMonsterTile[i,j] != null){ //없어진 타일이 몬스터다
+								int nowHP;
+								nowHP = CBoard.upgradeMonsterTile[i,j].hp - CBoard.tileOnBoard[i,j].grade;
+								if ( nowHP <= 0){
+									Destroy(CBoard.tileOnBoard[i,j].gameObject); 
+									NoTileOnBoardXY(CBoard,i,j);
+									Debug.Log("몬스터 죽음");
+									//드롭 아이템
+								}
+								else{
+									Destroy(CBoard.tileOnBoard[i,j].gameObject);
+									SummonMosterTile(boardObject,CBoard.upgradeMonsterTile[i,j],i,j);
+									Debug.Log("맞고 죽지 않음 HP = " + nowHP);
+								}
+								CBoard.upgradeMonsterTile[i,j] = null;
+							}
+							else{
+								Debug.Log("업그레이드");
+								int nowGrade = CBoard.tileOnBoard[i,j].grade;
+								Destroy(CBoard.tileOnBoard[i,j].gameObject);
+								SummonTile(boardObject,nowGrade ,i,j);
+							}
+							
+						}
+						
 						CBoard.upgrade[i,j] = false;
 					}
 				}
 			}
 		}
 	}
+	
 	void SummonTile(GameObject boardObject , int tileArry, int x, int y){
 		int isMonster;
 		isMonster = (int) Random.Range(0,2);
@@ -417,6 +470,32 @@ public class manager : MonoBehaviour {
 			attackValue = 1;
 			grade = 100;
 		}
+		
+		instance = Instantiate (summonTile, new Vector3 (0f,0f,0f), Quaternion.identity) as GameObject;
+		tile CTile = instance.GetComponent<tile>();
+		board CBoard = boardObject.GetComponent<board>();
+		
+		instance.transform.SetParent (boardObject.transform);
+		instance.transform.localPosition = GridToWorld(x,y);
+		CTile.tilePos.x = (float) x;
+		CTile.tilePos.y = (float) y;
+		CTile.grade = grade;
+		CTile.hp = hp;
+		CTile.attackValue = attackValue;
+
+		SetThisTileInBoardValue(CBoard,CTile,1);
+		SetThisTileInTileOnBoard(CBoard,CTile);
+
+	}
+	void SummonMosterTile(GameObject boardObject , tile Ctile, int x, int y){
+		GameObject summonTile;
+		GameObject instance;
+
+		int hp = Ctile.hp; //몬스터일때만
+		int attackValue = Ctile.attackValue; //몬스터 일때만 
+		int grade = Ctile.grade;
+		
+		summonTile = monsterTile[grade-100];
 		
 		instance = Instantiate (summonTile, new Vector3 (0f,0f,0f), Quaternion.identity) as GameObject;
 		tile CTile = instance.GetComponent<tile>();
