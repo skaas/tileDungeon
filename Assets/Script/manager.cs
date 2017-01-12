@@ -438,10 +438,10 @@ public class manager : MonoBehaviour {
 								CBoard.upgradeMonsterTile[i,j] = null;
 							}
 							else{
-								Debug.Log("업그레이드");
 								int nowGrade = CBoard.tileOnBoard[i,j].grade;
+								Debug.Log("업그레이드: nowGrade = " + nowGrade);
 								Destroy(CBoard.tileOnBoard[i,j].gameObject);
-								SummonTile(boardObject,nowGrade ,i,j);
+								SummonWeaponTile(boardObject,nowGrade ,i,j);
 							}
 							
 						}
@@ -482,6 +482,28 @@ public class manager : MonoBehaviour {
 		CTile.grade = grade;
 		CTile.hp = hp;
 		CTile.attackValue = attackValue;
+
+		SetThisTileInBoardValue(CBoard,CTile,1);
+		SetThisTileInTileOnBoard(CBoard,CTile);
+
+	}
+	void SummonWeaponTile(GameObject boardObject , int tileArry, int x, int y){
+		
+		GameObject summonTile;
+		GameObject instance;
+		int grade = tileArry + 1;
+		
+		summonTile = weaponTile[tileArry];
+		
+		instance = Instantiate (summonTile, new Vector3 (0f,0f,0f), Quaternion.identity) as GameObject;
+		tile CTile = instance.GetComponent<tile>();
+		board CBoard = boardObject.GetComponent<board>();
+		
+		instance.transform.SetParent (boardObject.transform);
+		instance.transform.localPosition = GridToWorld(x,y);
+		CTile.tilePos.x = (float) x;
+		CTile.tilePos.y = (float) y;
+		CTile.grade = grade;
 
 		SetThisTileInBoardValue(CBoard,CTile,1);
 		SetThisTileInTileOnBoard(CBoard,CTile);
