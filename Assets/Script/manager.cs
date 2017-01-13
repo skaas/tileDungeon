@@ -677,10 +677,11 @@ public class manager : MonoBehaviour {
 	}
 	
 	public static Vector3 GridToWorld(int x, int y) {
-		return new Vector3(1.2f * x  + 0.6f, 5.7f - (1.2f *y) , 0f);
+		// 0,0 = 0.3 , 6.6 
+		return new Vector3(1.2f * x  + 0.3f, 6.6f - (1.2f *y) , 0f);
 	}
 	
 	public static Vector2 WorldToGrid(float x, float y) {
-		return new Vector2((x - 0.6f)/1.2f, (5.7f - y)/1.2f);
+		return new Vector2((x - 0.3f)/1.2f, (6.6f - y)/1.2f);
 	}
 }
