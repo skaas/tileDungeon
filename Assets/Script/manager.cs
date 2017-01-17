@@ -8,6 +8,7 @@ public class manager : MonoBehaviour {
 	// 보드 가로,세로
 	private int row = 4;
 	private int col = 4;
+	private float moveSenstive = 1.1f; //이정도 가면 합쳐라
 	
 	private int newTileCount = 0;
 	// 한번에 많이 생성할 경우.
@@ -42,6 +43,16 @@ public class manager : MonoBehaviour {
 	public GameObject[] monsterTile; 
 	private Transform boardHolder;
 	// Use this for initialization
+
+	public bool moving; // 이동중
+	public Vector2 moveCheckPos;
+	public int movingDirection;
+
+	private bool moveStart;
+	private Vector2 startPosition;
+	private bool inputChecker;
+
+
 	void Awake () { 
 		// background 로딩
 		boardHolder = new GameObject("baseObject").transform;
@@ -56,6 +67,7 @@ public class manager : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+		
 		if(boardFilled){
 			Debug.Log("게임 종료 스페이스를 누르면 게임을 재식작합니다.");		
 		}
@@ -64,9 +76,10 @@ public class manager : MonoBehaviour {
 			IsGameOver();
 		}
 		if(waitingInput){
+			
 			if(Input.GetKeyUp(KeyCode.UpArrow)){
 				if(canMove[0]){
-					Move(0);
+					MoveComplite(0);
 					waitingSpawn = true;
 					waitingInput = false;
 				}
@@ -75,7 +88,7 @@ public class manager : MonoBehaviour {
 			}    	
 			if(Input.GetKeyUp(KeyCode.RightArrow)){
 				if(canMove[1]){
-					Move(1);
+					MoveComplite(1);
 					waitingSpawn = true;
 					waitingInput = false;
 				}
@@ -83,7 +96,7 @@ public class manager : MonoBehaviour {
 			}	
 			if(Input.GetKeyUp(KeyCode.DownArrow)){
 				if(canMove[2]){
-					Move(2);
+					MoveComplite(2);
 					waitingSpawn = true;
 					waitingInput = false;
 				}
@@ -91,7 +104,7 @@ public class manager : MonoBehaviour {
 			}
 			if(Input.GetKeyUp(KeyCode.LeftArrow)){
 				if(canMove[3]){
-					Move(3);
+					MoveComplite(3);
 					waitingSpawn = true;
 					waitingInput = false;
 				}
@@ -101,24 +114,53 @@ public class manager : MonoBehaviour {
 				boardFilled = false;
 				GameStart();
 			}
-			
+			if(Input.GetMouseButton(0) && inputChecker){
+				StartCoroutine(MouseDrag());
+			}
+			if(Input.GetMouseButtonUp(0)){
+				BackToOrigin();
+				inputChecker = true;
+				moving = false;
+				moveCheckPos = new Vector2 (0.0f, 0.0f);
+				movingDirection = 100;
+			}
 		}			
 	}
-
+	void BackToOrigin(){
+		GameObject[] weapons;
+		
+        weapons = GameObject.FindGameObjectsWithTag("WeaponTile");
+		foreach (GameObject weapon in weapons) {
+			tile CTile = weapon.GetComponent<tile>();
+			CTile.BackToOrigin();
+		}
+	}
 	void GameStart(){
 		// 시작 변수
 		waitingInput = true;
 		waitingSpawn = false;
-		earnedGolds = 0;
-		earnedKeys = 0;
-		CanMoveInit();
+		
+		InitValues();
 		ClearBoard();
+		
 		
 		// 생성
 		Spawn();
 		//
 	}
-	void CanMoveInit(){
+
+	void InitValues(){
+
+		earnedGolds = 0;
+		earnedKeys = 0;
+		moving = false;
+		moveCheckPos = new Vector2 (0.0f,0.0f);
+		//diffPos = new Vector2 (0.0f,0.0f);
+		movingDirection = 100;
+		moveStart = false;
+		startPosition = new Vector2 (0.0f,0.0f);
+		//inputChecker = true;
+		// 움직임
 		canMove[0] = false;
 		canMove[1] = false;
 		canMove[2] = false;
@@ -134,7 +176,7 @@ public class manager : MonoBehaviour {
 			Destroy(weapon);
 		}
 		// 보드 초기화
-		Debug.Log("시작 초기화");
+		//Debug.Log("시작 초기화");
 		for (int i = 0; i < 4; ++i){
             for (int j = 0; j < 4; ++j){
 				NoTileOnBoardXY(CBoard, i,j);
@@ -172,7 +214,7 @@ public class manager : MonoBehaviour {
 		board CBoard = background.GetComponent<board>();;
 		tile CTile;
 
-		CanMoveInit();
+		InitValues();
 		
 		foreach (GameObject weapon in weapons) {
 	
@@ -202,7 +244,6 @@ public class manager : MonoBehaviour {
 						}
 						else if( isCombine(CBoard.tileOnBoard[i,1], CBoard.tileOnBoard[i,2])){
 							if(CBoard.tileOnBoard[i,j] != null  && j >= 2){
-								Debug.Log("2");
 								CBoard.tileOnBoard[i,j].move[0] = true;
 								CBoard.tileOnBoard[i,2].combine[0] = true;
 							} 
@@ -211,7 +252,7 @@ public class manager : MonoBehaviour {
 							if(CBoard.tileOnBoard[i,3]!= null){
 								if(isCombine(CBoard.tileOnBoard[i,2],CBoard.tileOnBoard[i,3])){
 									if(CBoard.tileOnBoard[i,j]  != null && j >=3){
-										Debug.Log("3");
+										
 										CBoard.tileOnBoard[i,j].move[0] = true;
 										CBoard.tileOnBoard[i,3].combine[0] = true;
 									} 
@@ -357,7 +398,6 @@ public class manager : MonoBehaviour {
 	void SetUpgradeBoard(board CBoard, tile CTile){
 		CBoard.upgrade[(int)CTile.tilePos.x, (int)CTile.tilePos.y] = true;
 		CBoard.upgradeWeaponGrade[(int)CTile.tilePos.x, (int)CTile.tilePos.y] = CTile.grade;
-		Debug.Log("hp = " + CTile.hp);
 		if(CTile.hp > 0) {
 			
 			CBoard.upgradeMonsterTile[(int)CTile.tilePos.x, (int)CTile.tilePos.y] = CTile;
@@ -397,7 +437,6 @@ public class manager : MonoBehaviour {
 		for (int i = 0; i < row; ++i){
 			for (int j = 0; j < col; ++j){
 				if(CBoard.boardValue[i,j] <= 10){
-					Debug.Log("업데이트 초기화");
 					NoTileOnBoardXY(CBoard,i,j);
 				}
 				else{
@@ -409,7 +448,6 @@ public class manager : MonoBehaviour {
 							if ( nowHP <= 0){
 								Destroy(CBoard.tileOnBoard[i,j].gameObject); 
 								NoTileOnBoardXY(CBoard,i,j);
-								Debug.Log("몬스터 죽음");
 								//드롭 아이템
 							}
 							else{
@@ -548,12 +586,23 @@ public class manager : MonoBehaviour {
 		}
 
 	}
-	public void Move(int dir) {
+	void MoveingTile(Vector2 diffpos, int dir){
+		GameObject[] weapons;
+		
+        weapons = GameObject.FindGameObjectsWithTag("WeaponTile");
+		foreach (GameObject weapon in weapons) {
+			tile CTile = weapon.GetComponent<tile>();
+			if (CTile.move[dir]){	
+				CTile.TileMove(diffpos,dir);
+			}
+		}
+	}
+	public void MoveComplite(int dir) {
 		//0:up, 1:Right, 2:down, 3:Left
 		
 		GameObject[] weapons;
         weapons = GameObject.FindGameObjectsWithTag("WeaponTile");
-
+		inputChecker = false;
 		foreach (GameObject weapon in weapons) {
 			Vector2 Vtor = Vector2.zero;
 			tile CTile = weapon.GetComponent<tile>();
@@ -592,9 +641,12 @@ public class manager : MonoBehaviour {
 				}
 				
 				CTile.tilePos = CTile.tilePos + Vtor;
-				weapon.transform.localPosition = GridToWorld((int)CTile.tilePos.x , (int)CTile.tilePos.y);	
+				weapon.transform.localPosition = GridToWorld((int)CTile.tilePos.x , (int)CTile.tilePos.y);		
 			}		
 		}
+		// 움직임이 종료 되었음. 
+		UpdateTilesOnBoard(0);
+		UpdateTilesMoveDir();
 	}
 
 	void SetTileInfoToBoard(int x, int y, tile ctile){
@@ -620,8 +672,8 @@ public class manager : MonoBehaviour {
 		List<int> boardposlist = new List<int>();
 
 		//움직임이 끝난 타이밍을 잡고 싶은데 애매하다. 그래서 생성하기 전에 업데이트 움직임 --> 생성
-		UpdateTilesOnBoard(0);
-		UpdateTilesMoveDir();
+		//UpdateTilesOnBoard(0);
+		//UpdateTilesMoveDir();
 		//----------------------------------------------------------------------
 		for (int i = 0; i < 4; ++i){
             for (int j = 0; j < 4; ++j){
@@ -669,7 +721,6 @@ public class manager : MonoBehaviour {
 				newTileCount = 0;
 				waitingSpawn = false;
 				waitingInput = true;
-				//UpdateTilesGradeOnBoard();
 				UpdateTilesOnBoard(1);
 				UpdateTilesMoveDir();
 			}
@@ -684,4 +735,84 @@ public class manager : MonoBehaviour {
 	public static Vector2 WorldToGrid(float x, float y) {
 		return new Vector2((x - 0.3f)/1.2f, (6.6f - y)/1.2f);
 	}
+	IEnumerator MouseDrag(){ 
+		Vector2 mouseDragPosition = new Vector2(Input.mousePosition.x , Input.mousePosition.y);
+		Vector2 worldObjectPosition = Camera.main.ScreenToWorldPoint(mouseDragPosition);
+		if(moving){
+			if( moveCheckPos != worldObjectPosition){
+				Vector2 diffPos;				
+				diffPos = worldObjectPosition - moveCheckPos;
+				//Debug.Log(worldObjectPosition + " - " + moveCheckPos +";;update diffPos= "+ diffPos );
+				if(diffPos.x != 0.0f || diffPos.y != 0.0f){
+					if(movingDirection == 100){
+						startPosition = worldObjectPosition;
+						if(diffPos.y > 0.0f && diffPos.x > -0.5f && diffPos.x < 0.5f)
+						{
+							movingDirection = 0;
+						}
+						else if(diffPos.y < 0.0f   && diffPos.x > -0.5f && diffPos.x < 0.5f)
+						{
+							movingDirection = 2;
+						}
+						//swipe left
+						else if(diffPos.x < 0.0f  && diffPos.y > -0.5f && diffPos.y < 0.5f)
+						{
+							movingDirection = 3;
+						}
+						//swipe right
+						else if(diffPos.x > 0.0f && diffPos.y > -0.5f && diffPos.y < 0.5f)
+						{
+							movingDirection = 1;
+						}
+					}
+					else{
+						Vector2 checkDistance = moveCheckPos - startPosition;
+						//Debug.Log("얼마나 움직였나?" + checkDistance );
+						if(movingDirection == 0 && checkDistance.y > moveSenstive){
+							moving = false;
+							waitingSpawn = true;
+							waitingInput = false;
+							MoveComplite(movingDirection);
+						}
+						else if(movingDirection == 2 && checkDistance.y < -moveSenstive){
+							moving = false;
+							waitingSpawn = true;
+							waitingInput = false;
+							MoveComplite(movingDirection);
+						}
+						else if(movingDirection == 1 && checkDistance.x > moveSenstive){
+							moving = false;
+							waitingSpawn = true;
+							waitingInput = false;
+							MoveComplite(movingDirection);
+						}
+						else if(movingDirection == 3 && checkDistance.x < -moveSenstive){
+							moving = false;
+							waitingSpawn = true;
+							waitingInput = false;
+							MoveComplite(movingDirection);
+						}
+						else{
+							MoveingTile(diffPos, movingDirection);
+						}
+					}						
+					moveCheckPos = worldObjectPosition;
+				}
+				
+			}
+			else{
+				moveCheckPos = worldObjectPosition;
+			}
+			
+		}
+		else{
+			moving = true;
+			moveCheckPos = worldObjectPosition;
+		}
+				
+			
+		yield return null;
+	}
+		
 }
+
