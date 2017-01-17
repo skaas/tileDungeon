@@ -117,6 +117,9 @@ public class manager : MonoBehaviour {
 			if(Input.GetMouseButton(0) && inputChecker){
 				StartCoroutine(MouseDrag());
 			}
+			else if(!inputChecker){
+				inputChecker = true;
+			}
 			if(Input.GetMouseButtonUp(0)){
 				BackToOrigin();
 				inputChecker = true;
@@ -644,9 +647,9 @@ public class manager : MonoBehaviour {
 				weapon.transform.localPosition = GridToWorld((int)CTile.tilePos.x , (int)CTile.tilePos.y);		
 			}		
 		}
-		// 움직임이 종료 되었음. 
-		UpdateTilesOnBoard(0);
-		UpdateTilesMoveDir();
+		// 움직임이 종료 되었음. 여기 좀 오류가 나네;;
+		//UpdateTilesOnBoard(0);
+		//UpdateTilesMoveDir();
 	}
 
 	void SetTileInfoToBoard(int x, int y, tile ctile){
@@ -672,8 +675,9 @@ public class manager : MonoBehaviour {
 		List<int> boardposlist = new List<int>();
 
 		//움직임이 끝난 타이밍을 잡고 싶은데 애매하다. 그래서 생성하기 전에 업데이트 움직임 --> 생성
-		//UpdateTilesOnBoard(0);
-		//UpdateTilesMoveDir();
+		// 찾
+		UpdateTilesOnBoard(0);
+		UpdateTilesMoveDir();
 		//----------------------------------------------------------------------
 		for (int i = 0; i < 4; ++i){
             for (int j = 0; j < 4; ++j){
