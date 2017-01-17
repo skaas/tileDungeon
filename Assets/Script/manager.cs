@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-
+using DigitalRuby.Tween;
 
 public class manager : MonoBehaviour {
 
@@ -117,9 +117,7 @@ public class manager : MonoBehaviour {
 			if(Input.GetMouseButton(0) && inputChecker){
 				StartCoroutine(MouseDrag());
 			}
-			else if(!inputChecker){
-				inputChecker = true;
-			}
+			
 			if(Input.GetMouseButtonUp(0)){
 				BackToOrigin();
 				inputChecker = true;
@@ -127,6 +125,10 @@ public class manager : MonoBehaviour {
 				moveCheckPos = new Vector2 (0.0f, 0.0f);
 				movingDirection = 100;
 			}
+			// else if(!inputChecker){
+			// 	Debug.Log("??");
+			// 	inputChecker = true;
+			// }
 		}			
 	}
 	void BackToOrigin(){
@@ -136,6 +138,15 @@ public class manager : MonoBehaviour {
 		foreach (GameObject weapon in weapons) {
 			tile CTile = weapon.GetComponent<tile>();
 			CTile.BackToOrigin();
+		}
+	}
+	void MoveNext(){
+		GameObject[] weapons;
+		
+        weapons = GameObject.FindGameObjectsWithTag("WeaponTile");
+		foreach (GameObject weapon in weapons) {
+			tile CTile = weapon.GetComponent<tile>();
+			CTile.TileMoveNext();
 		}
 	}
 	void GameStart(){
@@ -159,7 +170,7 @@ public class manager : MonoBehaviour {
 		moving = false;
 		moveCheckPos = new Vector2 (0.0f,0.0f);
 		//diffPos = new Vector2 (0.0f,0.0f);
-		movingDirection = 100;
+		//movingDirection = 100;
 		moveStart = false;
 		startPosition = new Vector2 (0.0f,0.0f);
 		//inputChecker = true;
@@ -517,7 +528,34 @@ public class manager : MonoBehaviour {
 		board CBoard = boardObject.GetComponent<board>();
 		
 		instance.transform.SetParent (boardObject.transform);
-		instance.transform.localPosition = GridToWorld(x,y);
+		Vector3 _tmpPos = Vector3.zero;
+		Debug.Log("movingDirection = " + movingDirection);
+		//y= 7 -3 , x = -1 .4
+		if(movingDirection == 0){
+			_tmpPos = GridToWorld(x,4);
+		}
+		else if (movingDirection == 1){
+			_tmpPos = GridToWorld(-1,y);
+		}
+		else if (movingDirection == 2){
+			_tmpPos = GridToWorld(x,-1);
+		}
+		else if (movingDirection == 3){
+			_tmpPos = GridToWorld(4,y);
+		}
+		else{
+			_tmpPos = GridToWorld(x,y);
+		}
+		movingDirection = 100;
+		instance.gameObject.Tween("MoveCircle", _tmpPos, GridToWorld(x,y), 0.5f, TweenScaleFunctions.CubicEaseIn, (t) =>
+            {
+                // progress
+                instance.gameObject.transform.localPosition = t.CurrentValue;
+            }, (t) =>
+            {
+            });
+
+		//instance.transform.localPosition = GridToWorld(x,y);
 		CTile.tilePos.x = (float) x;
 		CTile.tilePos.y = (float) y;
 		CTile.grade = grade;
